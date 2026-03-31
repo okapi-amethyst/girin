@@ -1,0 +1,47 @@
+{
+  "name": "Yasuo",
+  "nameJa": "ヤスオ",
+  "slug": "yasuo",
+  "combos": [
+    {
+      "tier": 1,
+      "name": "基本コンボ",
+      "situation": "地上で相手に触れたとき",
+      "input": "5L > 5L > 5M > 5H > 236M",
+      "damage": 2850,
+      "difficulty": 1,
+      "note": "まずはこれだけ。迷ったらコレを振る。",
+      "essential": true
+    },
+    {
+      "tier": 1,
+      "name": "対空コンボ",
+      "situation": "相手が空中から攻めてきたとき",
+      "input": "2H > jM > jH > 236M",
+      "damage": 2400,
+      "difficulty": 1,
+      "note": "飛んできたら2Hで落として追撃。",
+      "essential": true
+    },
+    {
+      "tier": 2,
+      "name": "壁コンボ",
+      "situation": "相手を画面端に追い詰めたとき",
+      "input": "5L > 5M > 5H > 236H > 壁バウンド > 5M > 5H > 236M",
+      "damage": 3600,
+      "difficulty": 2,
+      "note": "画面端限定。ダメージが大きく伸びる。",
+      "essential": false
+    },
+    {
+      "tier": 3,
+      "name": "最大コンボ",
+      "situation": "ゲージがあるとき / 倒し切りたいとき",
+      "input": "5L > 5M > 5H > 236H > 壁 > 5M > 5H > 214S > Super",
+      "damage": 4800,
+      "difficulty": 3,
+      "note": "ゲージを使う最大火力。倒し切りに。",
+      "essential": false
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+---
+import Base from "../../layouts/Base.astro";
+import { characters } from "../../data/characters";
+import type { Character } from "../../data/characters";
+
+export function getStaticPaths() {
+  return characters.map((char) => ({
+    params: { slug: char.slug },
+    props: { char },
+  }));
+}
+
+interface Props {
+  char: Character;
+}
+
+const { char } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+// 相方候補 = 自分以外の全キャラ
+const partners = characters.filter((c) => c.slug !== char.slug);
+
+// Wiki crop スケーリング用
+function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
+  const size = parseInt(crop.bgSize);
+  const parts = crop.bgPosition.match(/-?\d+/g)?.map(Number) || [0, 0];
+  return { size, posX: parts[0], posY: parts[1] };
+}
+
+// ペアURL生成（id順で小さい方が先）
+function pairUrl(a: Character, b: Character): string {
+  const charA = characters.indexOf(a);
+  const charB = characters.indexOf(b);
+  if (charA < charB) {
+    return `${base}${a.slug}/${b.slug}/`;
+  }
+  return `${base}${b.slug}/${a.slug}/`;
+}
+---
+
+<Base title={`${char.nameJa} — 2XKO GIRIN`}>
+  <div class="container page">
+    <nav class="breadcrumb">
+      <a href={base}>トップ</a>
+      <span>/</span>
+      <span>{char.nameJa}</span>
+    </nav>
+
+    <header class="char-header">
+      {char.crop ? (
+        <div
+          class="char-icon-portrait"
+          data-size={scaleCrop(char.crop).size}
+          data-pos-x={scaleCrop(char.crop).posX}
+          data-pos-y={scaleCrop(char.crop).posY}
+          style={`background-image: url(${base}images/champions/600px-${char.slug}.png);`}
+        />
+      ) : (
+        <div class="char-icon-fallback">
+          <span>{char.nameJa[0]}</span>
+        </div>
+      )}
+      <div>
+        <h1>{char.name}</h1>
+        <p class="char-name-ja">{char.nameJa}</p>
+      </div>
+    </header>
+
+    <!-- 相方選択 -->
+    <section class="partner-section">
+      <h2 class="section-title">相方を選ぶ</h2>
+      <div class="partner-grid">
+        {partners.map((p) => {
+          const crop = p.crop ? scaleCrop(p.crop) : null;
+          return (
+            <a href={pairUrl(char, p)} class="partner-card">
+              {crop ? (
+                <div
+                  class="partner-portrait"
+                  data-size={crop.size}
+                  data-pos-x={crop.posX}
+                  data-pos-y={crop.posY}
+                  style={`background-image: url(${base}images/champions/600px-${p.slug}.png);`}
+                />
+              ) : (
+                <div class="partner-portrait partner-portrait-fallback">
+                  <span>{p.nameJa[0]}</span>
+                </div>
+              )}
+              <span class="partner-label">{p.nameJa}</span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- Juggernaut（相方選択の下、控えめに） -->
+    <section class="juggernaut-section">
+      <a href={`${base}${char.slug}/juggernaut/`} class="juggernaut-link">
+        <img
+          src={`${base}images/fuses/Juggernaut_fuse_360.png`}
+          alt="JUGGERNAUT"
+          class="juggernaut-fuse-icon"
+          width="28"
+          height="28"
+        />
+        <span class="juggernaut-link-text">
+          <span class="juggernaut-link-name">{char.nameJa} JUGGERNAUT</span>
+          <span class="juggernaut-link-desc">ソロFuseコンボ</span>
+        </span>
+      </a>
+    </section>
+
+    <section class="coming-soon-links">
+      <a href={`${base}mycombo/`} class="cs-link">
+        My Combos
+        <span class="badge-coming-soon">Coming Soon</span>
+      </a>
+      <a href="#" class="cs-link">
+        Submit Combo
+        <span class="badge-coming-soon">Coming Soon</span>
+      </a>
+    </section>
+  </div>
+</Base>
+
+<script>
+  const WIKI_REF = 180;
+  function scalePortraits() {
+    document.querySelectorAll<HTMLElement>('[data-size]').forEach(el => {
+      const w = el.clientWidth;
+      if (w === 0) return;
+      const scale = w / WIKI_REF;
+      el.style.backgroundSize = `${Number(el.dataset.size) * scale}px`;
+      el.style.backgroundPosition = `${Number(el.dataset.posX) * scale}px ${Number(el.dataset.posY) * scale}px`;
+    });
+  }
+  scalePortraits();
+  window.addEventListener('resize', scalePortraits);
+</script>
+
+<style>
+  .page {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .char-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .char-icon-portrait {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    background-color: var(--color-border);
+    flex-shrink: 0;
+  }
+
+  .char-icon-fallback {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  .char-header h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .char-name-ja {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  /* セクション共通 */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.03em;
+  }
+
+  /* Juggernaut（控えめリンク） */
+  .juggernaut-section {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .juggernaut-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.85rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-text-muted);
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .juggernaut-link:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .juggernaut-fuse-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .juggernaut-link-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+  }
+
+  .juggernaut-link-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  .juggernaut-link-desc {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+  }
+
+  /* 相方選択 */
+  .partner-section {
+    margin-bottom: 1rem;
+  }
+
+  .partner-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .partner-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .partner-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  .partner-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+    color: var(--color-text);
+    transition: border-color 0.15s;
+  }
+
+  .partner-card:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .partner-portrait {
+    width: 100%;
+    aspect-ratio: 6 / 5;
+    background-repeat: no-repeat;
+    background-color: var(--color-border);
+  }
+
+  .partner-portrait-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  .partner-label {
+    display: block;
+    text-align: center;
+    padding: 0.4rem 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Coming Soon リンク */
+  .coming-soon-links {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .cs-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .badge-coming-soon {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    background: var(--color-border);
+    color: var(--color-text-muted);
+  }
+</style>

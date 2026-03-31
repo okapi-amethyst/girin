@@ -1,0 +1,170 @@
+---
+import Base from "../../layouts/Base.astro";
+import { characters } from "../../data/characters";
+import type { Character } from "../../data/characters";
+
+export function getStaticPaths() {
+  return characters.map((char) => ({
+    params: { slug: char.slug },
+    props: { char },
+  }));
+}
+
+interface Props {
+  char: Character;
+}
+
+const { char } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
+  const size = parseInt(crop.bgSize);
+  const parts = crop.bgPosition.match(/-?\d+/g)?.map(Number) || [0, 0];
+  return { size, posX: parts[0], posY: parts[1] };
+}
+---
+
+<Base title={`${char.nameJa} JUGGERNAUT — 2XKO GIRIN`}>
+  <div class="container page">
+    <nav class="breadcrumb">
+      <a href={base}>トップ</a>
+      <span>/</span>
+      <a href={`${base}${char.slug}/`}>{char.nameJa}</a>
+      <span>/</span>
+      <span>JUGGERNAUT</span>
+    </nav>
+
+    <header class="char-header">
+      {char.crop ? (
+        <div
+          class="char-icon-portrait"
+          data-size={scaleCrop(char.crop).size}
+          data-pos-x={scaleCrop(char.crop).posX}
+          data-pos-y={scaleCrop(char.crop).posY}
+          style={`background-image: url(${base}images/champions/600px-${char.slug}.png);`}
+        />
+      ) : (
+        <div class="char-icon-fallback">
+          <span>{char.nameJa[0]}</span>
+        </div>
+      )}
+      <div>
+        <h1>{char.name}</h1>
+        <p class="fuse-label">JUGGERNAUT</p>
+      </div>
+    </header>
+
+    <!-- フィルター（ソロ用: アシスト・タグ関連なし） -->
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="filter-group">
+          <span class="filter-label">難易度</span>
+          <div class="filter-chips" data-filter="difficulty">
+            <button class="chip chip-pulse" data-value="1">★ <span class="pulse-badge">Pulse</span></button>
+            <button class="chip chip-pulse" data-value="2">★★ <span class="pulse-badge">Pulse</span></button>
+            <button class="chip" data-value="3">★★★</button>
+            <button class="chip" data-value="4">★★★★</button>
+            <button class="chip" data-value="5">★★★★★</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">始動</span>
+          <div class="filter-chips" data-filter="starter">
+            <button class="chip" data-value="ground">地上</button>
+            <button class="chip" data-value="anti-air">対空</button>
+            <button class="chip" data-value="counter">CH</button>
+            <button class="chip" data-value="throw">投げ</button>
+            <button class="chip" data-value="other">他</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">位置</span>
+          <div class="filter-chips" data-filter="position">
+            <button class="chip" data-value="center">中央</button>
+            <button class="chip" data-value="corner">端</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">並び順</span>
+          <select class="sort-select">
+            <option value="practicality-desc">実用度</option>
+            <option value="difficulty-asc">難易度（低い順）</option>
+            <option value="damage-desc">ダメージ（高い順）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <section class="combo-area">
+      <div class="combo-empty">
+        <p>コンボデータ準備中</p>
+        <p class="combo-empty-sub">JUGGERNAUTコンボが登録されると、ここに表示されます</p>
+      </div>
+    </section>
+
+    <section class="coming-soon-links">
+      <a href={`${base}mycombo/`} class="cs-link">
+        My Combos
+        <span class="badge-coming-soon">Coming Soon</span>
+      </a>
+      <a href="#" class="cs-link">
+        Submit Combo
+        <span class="badge-coming-soon">Coming Soon</span>
+      </a>
+    </section>
+  </div>
+</Base>
+
+<script>
+  const WIKI_REF = 180;
+  function scalePortraits() {
+    document.querySelectorAll<HTMLElement>('[data-size]').forEach(el => {
+      const w = el.clientWidth;
+      if (w === 0) return;
+      const scale = w / WIKI_REF;
+      el.style.backgroundSize = `${Number(el.dataset.size) * scale}px`;
+      el.style.backgroundPosition = `${Number(el.dataset.posX) * scale}px ${Number(el.dataset.posY) * scale}px`;
+    });
+  }
+  scalePortraits();
+  window.addEventListener('resize', scalePortraits);
+
+  document.querySelectorAll('.filter-chips').forEach(group => {
+    group.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => chip.classList.toggle('active'));
+    });
+  });
+</script>
+
+<style>
+  .page { padding-top: 1.5rem; padding-bottom: 2rem; }
+  .breadcrumb { font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1.5rem; display: flex; gap: 0.5rem; }
+  .char-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+  .char-icon-portrait { width: 56px; height: 56px; border-radius: 50%; background-repeat: no-repeat; background-color: var(--color-border); flex-shrink: 0; }
+  .char-icon-fallback { width: 56px; height: 56px; border-radius: 50%; background: var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: var(--color-text-muted); flex-shrink: 0; }
+  .char-header h1 { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+  .fuse-label { color: var(--color-accent); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 0.15rem; }
+
+  .filter-bar { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.75rem; margin-bottom: 1.25rem; }
+  .filter-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .filter-group { display: flex; align-items: center; gap: 0.35rem; }
+  .filter-label { font-size: 0.7rem; font-weight: 600; color: var(--color-text-muted); white-space: nowrap; }
+  .filter-chips { display: flex; gap: 0.2rem; }
+  .chip { padding: 0.2rem 0.5rem; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text-muted); font-size: 0.7rem; cursor: pointer; transition: border-color 0.15s, color 0.15s, background 0.15s; display: inline-flex; align-items: center; gap: 0.25rem; }
+  .chip:hover { border-color: var(--color-accent); color: var(--color-text); }
+  .chip.active { border-color: var(--color-accent); color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+  .pulse-badge { font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.05rem 0.25rem; border-radius: 2px; background: color-mix(in srgb, var(--color-danger) 20%, transparent); color: var(--color-danger); }
+  .sort-select { padding: 0.2rem 0.4rem; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text); font-size: 0.7rem; }
+
+  .combo-area { min-height: 200px; }
+  .combo-empty { text-align: center; padding: 3rem 1rem; color: var(--color-text-muted); }
+  .combo-empty p { font-size: 0.95rem; font-weight: 600; }
+  .combo-empty-sub { font-size: 0.8rem !important; font-weight: 400 !important; margin-top: 0.35rem; }
+
+  .coming-soon-links { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
+  .cs-link { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600; pointer-events: none; opacity: 0.7; }
+  .badge-coming-soon { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.15rem 0.4rem; border-radius: 3px; background: var(--color-border); color: var(--color-text-muted); }
+</style>

@@ -1,0 +1,75 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Random Combo — 2XKO GIRIN">
+  <div class="container page">
+    <nav class="breadcrumb">
+      <a href={import.meta.env.BASE_URL}>トップ</a>
+      <span>/</span>
+      <span>Random Combo</span>
+    </nav>
+
+    <header class="random-header">
+      <h1>Random Combo</h1>
+      <p class="random-sub">今日のおすすめコンボをランダムで表示します</p>
+    </header>
+
+    <section class="random-area">
+      <div class="combo-empty">
+        <p>コンボデータ準備中</p>
+        <p class="combo-empty-sub">コンボが登録されると、ここにランダムでおすすめが表示されます</p>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .random-header {
+    margin-bottom: 2rem;
+  }
+
+  .random-header h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+
+  .random-sub {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+
+  .combo-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+  }
+
+  .combo-empty p {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .combo-empty-sub {
+    font-size: 0.8rem !important;
+    font-weight: 400 !important;
+    margin-top: 0.35rem;
+  }
+</style>

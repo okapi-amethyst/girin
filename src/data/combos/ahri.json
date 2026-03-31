@@ -1,0 +1,27 @@
+{
+  "name": "Ahri",
+  "nameJa": "アーリ",
+  "slug": "ahri",
+  "combos": [
+    {
+      "tier": 1,
+      "name": "基本コンボ",
+      "situation": "地上で相手に触れたとき",
+      "input": "5L > 5M > 5H > 236L",
+      "damage": 2600,
+      "difficulty": 1,
+      "note": "まずはこれ。シンプルで安定。",
+      "essential": true
+    },
+    {
+      "tier": 1,
+      "name": "チャームコンボ",
+      "situation": "チャーム（236S）が当たったとき",
+      "input": "236S > 5H > 5M > 236M",
+      "damage": 2900,
+      "difficulty": 1,
+      "note": "チャームヒット確認から。大きなリターン。",
+      "essential": true
+    }
+  ]
+}

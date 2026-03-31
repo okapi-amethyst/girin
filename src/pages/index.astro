@@ -1,17 +1,229 @@
 ---
+import Base from "../layouts/Base.astro";
+import { characters } from "../data/characters";
 
+// Wiki値は180px幅カード基準。スケール比率をCSS変数で渡す
+const WIKI_REF_WIDTH = 180;
+
+function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
+  // パース: "400px" -> 400, "-65px -10px" -> [-65, -10]
+  const size = parseInt(crop.bgSize);
+  const parts = crop.bgPosition.match(/-?\d+/g)?.map(Number) || [0, 0];
+  return { size, posX: parts[0], posY: parts[1] };
+}
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base title="2XKO GIRIN">
+  <section class="hero">
+    <div class="container">
+      <p class="hero-sub">今のあなたに最適なコンボがみつかるかも</p>
+    </div>
+  </section>
+
+  <section class="nav-links">
+    <div class="container nav-links-row">
+      <a href={`${import.meta.env.BASE_URL}random/`} class="nav-link-card">
+        <span class="nav-link-label">Random Combo</span>
+        <span class="nav-link-desc">今日のおすすめ</span>
+      </a>
+      <a href={`${import.meta.env.BASE_URL}mycombo/`} class="nav-link-card nav-link-disabled">
+        <span class="nav-link-label">
+          My Combos
+          <span class="badge-coming-soon">Coming Soon</span>
+        </span>
+        <span class="nav-link-desc">ブックマーク</span>
+      </a>
+      <a href="#" class="nav-link-card nav-link-disabled">
+        <span class="nav-link-label">
+          Submit Combo
+          <span class="badge-coming-soon">Coming Soon</span>
+        </span>
+        <span class="nav-link-desc">コンボ投稿</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="characters">
+    <div class="container">
+      <div class="char-grid">
+        {characters.map((char) => {
+          const crop = char.crop ? scaleCrop(char.crop) : null;
+          return (
+            <a href={`${import.meta.env.BASE_URL}${char.slug}/`} class="char-card">
+              {crop ? (
+                <div
+                  class="char-portrait"
+                  data-size={crop.size}
+                  data-pos-x={crop.posX}
+                  data-pos-y={crop.posY}
+                  style={`background-image: url(${import.meta.env.BASE_URL}images/champions/600px-${char.slug}.png);`}
+                />
+              ) : (
+                <div class="char-portrait char-portrait-fallback">
+                  <span>{char.nameJa[0]}</span>
+                </div>
+              )}
+              <span class="char-label">{char.nameJa}</span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // キャラポートレートのクロップをカード幅に合わせてスケーリング
+  const WIKI_REF = 180;
+  function scalePortraits() {
+    document.querySelectorAll<HTMLElement>('.char-portrait[data-size]').forEach(el => {
+      const cardWidth = el.clientWidth;
+      const scale = cardWidth / WIKI_REF;
+      const size = Number(el.dataset.size) * scale;
+      const posX = Number(el.dataset.posX) * scale;
+      const posY = Number(el.dataset.posY) * scale;
+      el.style.backgroundSize = `${size}px`;
+      el.style.backgroundPosition = `${posX}px ${posY}px`;
+    });
+  }
+  scalePortraits();
+  window.addEventListener('resize', scalePortraits);
+</script>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 1.5rem 0 1rem;
+  }
+
+  .hero-sub {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+
+  .nav-links {
+    padding: 0 0 1.5rem;
+  }
+
+  .nav-links-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .nav-link-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    color: var(--color-text);
+    font-size: 0.85rem;
+    transition: border-color 0.15s;
+    min-width: 140px;
+  }
+
+  .nav-link-card:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .nav-link-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .nav-link-desc {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+  }
+
+  .nav-link-disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .badge-coming-soon {
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    background: var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  .characters {
+    padding: 0 0 1rem;
+  }
+
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .char-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .char-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  .char-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+    color: var(--color-text);
+    transition: border-color 0.15s;
+  }
+
+  .char-card:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .char-portrait {
+    width: 100%;
+    aspect-ratio: 6 / 5;
+    background-repeat: no-repeat;
+    background-color: var(--color-border);
+  }
+
+  .char-portrait-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  .char-label {
+    display: block;
+    text-align: center;
+    padding: 0.4rem 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
