@@ -2,10 +2,17 @@
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
 }
 
-const { title, description = "2XKO GIRIN — これだけ覚えたら対戦行ってOK" } = Astro.props;
+const {
+  title,
+  description = "2XKO GIRIN — これだけ覚えたら対戦行ってOK",
+  ogImage = `${import.meta.env.BASE_URL}og-default.png`,
+} = Astro.props;
 const base = import.meta.env.BASE_URL;
+const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).toString();
+const currentUrl = Astro.url.toString();
 ---
 
 <!doctype html>
@@ -15,7 +22,14 @@ const base = import.meta.env.BASE_URL;
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={currentUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
+    <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
     <script is:inline>
       (function() {
         const saved = localStorage.getItem('theme');
@@ -34,6 +48,21 @@ const base = import.meta.env.BASE_URL;
           <span class="logo-text">GIRIN</span>
         </a>
         <span class="site-badge">2XKO</span>
+        <a href="#" class="header-link is-disabled" aria-disabled="true">
+          New Arrivals
+          <span class="header-badge">Coming Soon</span>
+        </a>
+        <a href="#" class="header-link is-disabled" aria-disabled="true">
+          My Combos
+          <span class="header-badge">Coming Soon</span>
+        </a>
+        <button class="header-icon-btn" id="share-button" type="button" aria-label="ページを共有">
+          Share
+        </button>
+        <span class="share-feedback" id="share-feedback" aria-live="polite"></span>
+        <button class="header-icon-btn is-disabled" type="button" aria-label="検索" disabled>
+          Search
+        </button>
         <button class="theme-toggle" id="theme-toggle" type="button" aria-label="テーマ切替">
           <span class="theme-icon-dark">☀</span>
           <span class="theme-icon-light">☾</span>
@@ -47,7 +76,26 @@ const base = import.meta.env.BASE_URL;
 
     <footer class="site-footer">
       <div class="container">
-        <p>2XKO GIRIN — これだけ覚えたら対戦行ってOK</p>
+        <p class="footer-copy">© 2026 GIRIN | 2XKO GIRIN はファンサイトであり Riot Games とは無関係です</p>
+        <p class="footer-note">
+          2XKO GIRIN is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing 2XKO.
+        </p>
+        <div class="footer-links">
+          <details class="footer-details">
+            <summary>免責事項 / 権利表記</summary>
+            <p>
+              本サイトはファンによる非公式サイトです。掲載されているゲーム名・キャラクター名・画像等の権利は各権利者に帰属します。
+            </p>
+          </details>
+          <a href={`${base}privacy/`}>プライバシーポリシー</a>
+          <a href="https://discord.gg/" target="_blank" rel="noreferrer" class="footer-social-link">
+            <span class="footer-social-icon" aria-hidden="true">◌</span>
+            <span>Discord サーバーに参加</span>
+          </a>
+          <a href="https://x.com/" target="_blank" rel="noreferrer" class="footer-social-link" aria-label="X">
+            <span class="footer-social-icon" aria-hidden="true">𝕏</span>
+          </a>
+        </div>
       </div>
     </footer>
   </body>
@@ -60,6 +108,27 @@ const base = import.meta.env.BASE_URL;
     const next = current === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
+  });
+
+  const shareButton = document.getElementById('share-button');
+  const shareFeedback = document.getElementById('share-feedback');
+  let shareTimer;
+
+  shareButton?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      if (shareFeedback) {
+        shareFeedback.textContent = 'コピーしました';
+        window.clearTimeout(shareTimer);
+        shareTimer = window.setTimeout(() => {
+          shareFeedback.textContent = '';
+        }, 1800);
+      }
+    } catch {
+      if (shareFeedback) {
+        shareFeedback.textContent = 'コピーに失敗しました';
+      }
+    }
   });
 </script>
 
@@ -75,6 +144,7 @@ const base = import.meta.env.BASE_URL;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   .site-logo {
@@ -100,6 +170,59 @@ const base = import.meta.env.BASE_URL;
     letter-spacing: 0.05em;
   }
 
+  .header-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .header-link.is-disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .header-badge {
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    background: var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  .header-icon-btn {
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text);
+    padding: 0.3rem 0.55rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: border-color 0.15s, color 0.15s, opacity 0.15s;
+  }
+
+  .header-icon-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .header-icon-btn.is-disabled,
+  .header-icon-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .share-feedback {
+    min-width: 6.5rem;
+    font-size: 0.75rem;
+    color: var(--color-accent);
+  }
+
   .theme-toggle {
     margin-left: auto;
     background: none;
@@ -117,11 +240,8 @@ const base = import.meta.env.BASE_URL;
     border-color: var(--color-accent);
   }
 
-  /* dark theme: show sun icon (switch to light) */
   :root:not([data-theme="light"]) .theme-icon-light { display: none; }
   :root:not([data-theme="light"]) .theme-icon-dark { display: inline; }
-
-  /* light theme: show moon icon (switch to dark) */
   :root[data-theme="light"] .theme-icon-dark { display: none; }
   :root[data-theme="light"] .theme-icon-light { display: inline; }
 
@@ -129,8 +249,53 @@ const base = import.meta.env.BASE_URL;
     border-top: 1px solid var(--color-border);
     padding: 2rem 0;
     margin-top: 3rem;
-    text-align: center;
     color: var(--color-text-muted);
     font-size: 0.85rem;
+  }
+
+  .site-footer .container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .footer-copy,
+  .footer-note {
+    margin: 0;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.2rem;
+    align-items: center;
+  }
+
+  .footer-social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .footer-social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    line-height: 1;
+  }
+
+  .footer-details {
+    cursor: pointer;
+  }
+
+  .footer-details p {
+    margin-top: 0.5rem;
+    max-width: 64ch;
+    line-height: 1.5;
   }
 </style>

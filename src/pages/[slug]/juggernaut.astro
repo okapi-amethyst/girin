@@ -24,7 +24,10 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
 }
 ---
 
-<Base title={`${char.nameJa} JUGGERNAUT — 2XKO GIRIN`}>
+<Base
+  title={`${char.nameJa} JUGGERNAUT コンボ | 2XKO GIRIN`}
+  description={`${char.nameJa}のJUGGERNAUTコンボ一覧。難易度や状況ごとに確認できます。`}
+>
   <div class="container page">
     <nav class="breadcrumb">
       <a href={base}>トップ</a>
@@ -54,7 +57,6 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
       </div>
     </header>
 
-    <!-- フィルター（ソロ用: アシスト・タグ関連なし） -->
     <div class="filter-bar">
       <div class="filter-row">
         <div class="filter-group">
@@ -72,10 +74,10 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
           <span class="filter-label">始動</span>
           <div class="filter-chips" data-filter="starter">
             <button class="chip" data-value="ground">地上</button>
-            <button class="chip" data-value="anti-air">対空</button>
-            <button class="chip" data-value="counter">CH</button>
+            <button class="chip" data-value="anti_air">対空</button>
+            <button class="chip" data-value="counter_hit">CH</button>
             <button class="chip" data-value="throw">投げ</button>
-            <button class="chip" data-value="other">他</button>
+            <button class="chip" data-value="pressure_mixup">崩し</button>
           </div>
         </div>
 

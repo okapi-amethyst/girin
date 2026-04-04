@@ -1,0 +1,23 @@
+---
+import PairComboPage from '../../../components/PairComboPage.astro';
+import { characters } from '../../../data/characters';
+import { sampleCombos } from '../../../data/sample-combos';
+import { buildFuseStaticEntries, resolveFuseFilter } from '../../../data/pair-page';
+
+export function getStaticPaths() {
+  return buildFuseStaticEntries();
+}
+
+interface Props {
+  fuseSlug: string | null;
+  fuseLabel: string | null;
+}
+
+const { fuseSlug, fuseLabel } = Astro.props;
+const charA = characters.find((character) => character.slug === 'ahri')!;
+const charB = characters.find((character) => character.slug === 'yasuo')!;
+const fuseFilter = resolveFuseFilter(fuseSlug);
+const combos = fuseFilter ? sampleCombos.filter((combo) => combo.fuse === fuseFilter) : sampleCombos;
+---
+
+<PairComboPage charA={charA} charB={charB} combos={combos} fuseSlug={fuseSlug} fuseLabel={fuseLabel} />

@@ -24,7 +24,31 @@ function positionLabel(pos: string): string {
   return map[pos] || pos;
 }
 
-// 入力表記の短縮: 先頭2〜3 + ... + 末尾1〜2
+function starterLabel(starter: ComboData["starter"]): string {
+  const map: Record<ComboData["starter"], string> = {
+    ground: "地上",
+    anti_air: "対空",
+    throw: "投げ",
+    pressure_mixup: "崩し",
+    counter_hit: "CH",
+  };
+  return map[starter];
+}
+
+function comboTagLabel(tag: ComboData["tags"][number]): string {
+  const map: Record<ComboData["tags"][number], string> = {
+    oki: "起き攻め",
+    corner_carry: "端運び",
+    side_switch: "入替え",
+    fury: "Fury",
+    hkd: "HKD",
+    limit_strike: "Limit Strike",
+    crossup: "表裏",
+    punish: "確反",
+  };
+  return map[tag];
+}
+
 function shortenInputs(inputs: string): { short: string; needsExpand: boolean } {
   const parts = inputs.split(/\s*>\s*/);
   if (parts.length <= 5) {
@@ -39,8 +63,22 @@ const { short: shortInputs, needsExpand } = shortenInputs(combo.inputs);
 const comboCardId = `combo-${combo.id}`;
 ---
 
-<article class="combo-card" id={`combo-${combo.id}`}>
-  <!-- ヘッダー行: 難易度 + ダメージ + ID -->
+<article
+  class="combo-card"
+  id={`combo-${combo.id}`}
+  data-id={combo.id}
+  data-difficulty={combo.difficulty}
+  data-starter={combo.starter}
+  data-position={combo.position}
+  data-assist-used={combo.assist_used}
+  data-tag={combo.tag}
+  data-duo-only={combo.duo_only}
+  data-ult-gauge-point={combo.ult_gauge_point}
+  data-ult-gauge-assist={combo.ult_gauge_assist}
+  data-tags={combo.tags.join(",")}
+  data-practicality={combo.practicality}
+  data-damage={combo.damage}
+>
   <div class="cc-header">
     <span class="cc-difficulty">
       <span class="cc-stars">{stars(combo.difficulty)}</span>
@@ -50,59 +88,31 @@ const comboCardId = `combo-${combo.id}`;
     <span class="cc-id">#{combo.id}</span>
   </div>
 
-  <!-- 状況バッジ行 -->
   <div class="cc-badges">
-    <span class="cc-badge cc-badge-starter">{combo.starter}</span>
+    <span class="cc-badge cc-badge-starter">{starterLabel(combo.starter)}</span>
     <span class="cc-badge cc-badge-position">{positionLabel(combo.position)}</span>
     {combo.tag && <span class="cc-badge cc-badge-tag">交代</span>}
     {combo.assist_used && <span class="cc-badge cc-badge-assist">Assist</span>}
     {combo.duo_only && <span class="cc-badge cc-badge-duo">DUO</span>}
-    {combo.ult_gauge_point > 0 && (
-      <span class="cc-badge cc-badge-gauge">P.ゲージ ×{combo.ult_gauge_point}</span>
-    )}
-    {combo.ult_gauge_assist > 0 && (
-      <span class="cc-badge cc-badge-gauge">A.ゲージ ×{combo.ult_gauge_assist}</span>
-    )}
+    {combo.ult_gauge_point > 0 && <span class="cc-badge cc-badge-gauge">P.ゲージ ×{combo.ult_gauge_point}</span>}
+    {combo.ult_gauge_assist > 0 && <span class="cc-badge cc-badge-gauge">A.ゲージ ×{combo.ult_gauge_assist}</span>}
   </div>
 
-  <!-- 入力表記（短縮 + 展開） -->
   <div class="cc-inputs-wrap">
     <div class="cc-inputs cc-inputs-short" data-card={comboCardId}>
       <code>{shortInputs}</code>
     </div>
-    {needsExpand && (
-      <div class="cc-inputs cc-inputs-full" data-card-full={comboCardId} style="display:none;">
-        <code>{combo.inputs}</code>
-      </div>
-    )}
-    {needsExpand && (
-      <button class="cc-expand-btn" data-expand={comboCardId} type="button">
-        全表記
-      </button>
-    )}
+    {needsExpand && <div class="cc-inputs cc-inputs-full" data-card-full={comboCardId} style="display:none;"><code>{combo.inputs}</code></div>}
+    {needsExpand && <button class="cc-expand-btn" data-expand={comboCardId} type="button">全表記</button>}
   </div>
 
-  <!-- タグ -->
-  {combo.tags.length > 0 && (
-    <div class="cc-tags">
-      {combo.tags.map((t) => (
-        <span class="cc-tag">{t}</span>
-      ))}
-    </div>
-  )}
+  {combo.tags.length > 0 && <div class="cc-tags">{combo.tags.map((t) => <span class="cc-tag">{comboTagLabel(t)}</span>)}</div>}
+  {combo.notes && <p class="cc-notes">{combo.notes}</p>}
 
-  <!-- 補足 -->
-  {combo.notes && (
-    <p class="cc-notes">{combo.notes}</p>
-  )}
-
-  <!-- フッター: 投稿者 + アクション -->
   <div class="cc-footer">
     <div class="cc-credit">
       <span class="cc-submitter">{combo.submitter_name}</span>
-      {combo.creator_name && (
-        <span class="cc-creator">考案: {combo.creator_name}</span>
-      )}
+      {combo.creator_name && <span class="cc-creator">考案: {combo.creator_name}</span>}
     </div>
     <div class="cc-actions">
       <button class="cc-action-btn" title="リンクをコピー" data-combo-id={combo.id}>
@@ -111,16 +121,7 @@ const comboCardId = `combo-${combo.id}`;
           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
         </svg>
       </button>
-      <button
-        class="cc-action-btn cc-video-btn"
-        title="動画を見る"
-        data-video-url={combo.video_url}
-        data-video-inputs={combo.inputs}
-        data-video-combo-id={combo.id}
-        data-video-damage={combo.damage}
-        data-video-difficulty={combo.difficulty}
-        type="button"
-      >
+      <button class="cc-action-btn cc-video-btn" title="動画を見る" data-video-url={combo.video_url} data-video-inputs={combo.inputs} data-video-combo-id={combo.id} data-video-damage={combo.damage} data-video-difficulty={combo.difficulty} type="button">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="5 3 19 12 5 21 5 3"/>
         </svg>
@@ -135,256 +136,50 @@ const comboCardId = `combo-${combo.id}`;
 </article>
 
 <style>
-  .combo-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 0.85rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    transition: border-color 0.15s;
-    cursor: pointer;
-  }
-
-  .combo-card:hover {
-    border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-accent));
-  }
-
-  /* ヘッダー行 */
-  .cc-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .cc-difficulty {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .cc-stars {
-    font-size: 0.7rem;
-    color: #fbbf24;
-    letter-spacing: 0.02em;
-  }
-
-  .cc-pulse-badge {
-    font-size: 0.5rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 0.05rem 0.25rem;
-    border-radius: 2px;
-    background: color-mix(in srgb, var(--color-danger) 20%, transparent);
-    color: var(--color-danger);
-  }
-
-  .cc-damage {
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: var(--color-text);
-    margin-left: auto;
-  }
-
-  .cc-id {
-    font-size: 0.65rem;
-    color: var(--color-text-muted);
-    opacity: 0.6;
-  }
-
-  /* 状況バッジ */
-  .cc-badges {
-    display: flex;
-    gap: 0.25rem;
-    flex-wrap: wrap;
-  }
-
-  .cc-badge {
-    font-size: 0.6rem;
-    font-weight: 600;
-    padding: 0.1rem 0.35rem;
-    border-radius: 3px;
-    white-space: nowrap;
-  }
-
-  .cc-badge-starter {
-    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
-    color: var(--color-accent);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-  }
-
-  .cc-badge-position {
-    background: color-mix(in srgb, #60a5fa 15%, transparent);
-    color: #60a5fa;
-    border: 1px solid color-mix(in srgb, #60a5fa 30%, transparent);
-  }
-
-  .cc-badge-tag {
-    background: color-mix(in srgb, #a78bfa 15%, transparent);
-    color: #a78bfa;
-    border: 1px solid color-mix(in srgb, #a78bfa 30%, transparent);
-  }
-
-  .cc-badge-assist {
-    background: color-mix(in srgb, #fb923c 15%, transparent);
-    color: #fb923c;
-    border: 1px solid color-mix(in srgb, #fb923c 30%, transparent);
-  }
-
-  .cc-badge-duo {
-    background: color-mix(in srgb, #f472b6 15%, transparent);
-    color: #f472b6;
-    border: 1px solid color-mix(in srgb, #f472b6 30%, transparent);
-  }
-
-  .cc-badge-gauge {
-    background: color-mix(in srgb, #38bdf8 15%, transparent);
-    color: #38bdf8;
-    border: 1px solid color-mix(in srgb, #38bdf8 30%, transparent);
-  }
-
-  /* 入力表記 */
-  .cc-inputs-wrap {
-    position: relative;
-  }
-
-  .cc-inputs {
-    background: var(--color-bg);
-    border-radius: 6px;
-    padding: 0.5rem 0.7rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .cc-inputs code {
-    font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", monospace;
-    font-size: 0.85rem;
-    color: #fbbf24;
-    white-space: nowrap;
-    line-height: 1.4;
-  }
-
-  .cc-expand-btn {
-    display: inline-block;
-    margin-top: 0.25rem;
-    padding: 0.1rem 0.4rem;
-    font-size: 0.6rem;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    background: var(--color-border);
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: color 0.15s, background 0.15s;
-  }
-
-  .cc-expand-btn:hover {
-    color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
-  }
-
-  /* 追加タグ */
-  .cc-tags {
-    display: flex;
-    gap: 0.2rem;
-    flex-wrap: wrap;
-  }
-
-  .cc-tag {
-    font-size: 0.6rem;
-    font-weight: 500;
-    padding: 0.1rem 0.3rem;
-    border-radius: 3px;
-    background: var(--color-border);
-    color: var(--color-text-muted);
-  }
-
-  /* 補足 */
-  .cc-notes {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    line-height: 1.4;
-  }
-
-  /* フッター */
-  .cc-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 0.35rem;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .cc-credit {
-    display: flex;
-    flex-direction: column;
-    gap: 0.05rem;
-  }
-
-  .cc-submitter {
-    font-size: 0.65rem;
-    color: var(--color-text-muted);
-  }
-
-  .cc-creator {
-    font-size: 0.6rem;
-    color: var(--color-text-muted);
-    opacity: 0.7;
-  }
-
-  .cc-actions {
-    display: flex;
-    gap: 0.3rem;
-  }
-
-  .cc-action-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: 1px solid var(--color-border);
-    border-radius: 5px;
-    background: transparent;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-    padding: 0;
-    text-decoration: none;
-  }
-
-  .cc-action-btn:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-
-  .cc-bookmark-btn {
-    opacity: 0.4;
-    cursor: default;
-  }
+  .combo-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem; transition: border-color 0.15s; cursor: pointer; }
+  .combo-card:hover { border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-accent)); }
+  .cc-header { display: flex; align-items: center; gap: 0.5rem; }
+  .cc-difficulty { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .cc-stars { font-size: 0.7rem; color: #fbbf24; letter-spacing: 0.02em; }
+  .cc-pulse-badge { font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.05rem 0.25rem; border-radius: 2px; background: color-mix(in srgb, var(--color-danger) 20%, transparent); color: var(--color-danger); }
+  .cc-damage { font-size: 0.85rem; font-weight: 800; color: var(--color-text); margin-left: auto; }
+  .cc-id { font-size: 0.65rem; color: var(--color-text-muted); opacity: 0.6; }
+  .cc-badges { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+  .cc-badge { font-size: 0.6rem; font-weight: 600; padding: 0.1rem 0.35rem; border-radius: 3px; white-space: nowrap; }
+  .cc-badge-starter { background: color-mix(in srgb, var(--color-accent) 15%, transparent); color: var(--color-accent); border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent); }
+  .cc-badge-position { background: color-mix(in srgb, #60a5fa 15%, transparent); color: #60a5fa; border: 1px solid color-mix(in srgb, #60a5fa 30%, transparent); }
+  .cc-badge-tag { background: color-mix(in srgb, #a78bfa 15%, transparent); color: #a78bfa; border: 1px solid color-mix(in srgb, #a78bfa 30%, transparent); }
+  .cc-badge-assist { background: color-mix(in srgb, #fb923c 15%, transparent); color: #fb923c; border: 1px solid color-mix(in srgb, #fb923c 30%, transparent); }
+  .cc-badge-duo { background: color-mix(in srgb, #f472b6 15%, transparent); color: #f472b6; border: 1px solid color-mix(in srgb, #f472b6 30%, transparent); }
+  .cc-badge-gauge { background: color-mix(in srgb, #38bdf8 15%, transparent); color: #38bdf8; border: 1px solid color-mix(in srgb, #38bdf8 30%, transparent); }
+  .cc-inputs-wrap { position: relative; }
+  .cc-inputs { background: var(--color-bg); border-radius: 6px; padding: 0.5rem 0.7rem; overflow-x: auto; }
+  .cc-inputs code { font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", monospace; font-size: 0.85rem; color: #fbbf24; white-space: nowrap; line-height: 1.4; }
+  .cc-expand-btn { display: inline-block; margin-top: 0.25rem; padding: 0.1rem 0.4rem; font-size: 0.6rem; font-weight: 600; color: var(--color-text-muted); background: var(--color-border); border: none; border-radius: 3px; cursor: pointer; }
+  .cc-tags { display: flex; gap: 0.2rem; flex-wrap: wrap; }
+  .cc-tag { font-size: 0.6rem; font-weight: 500; padding: 0.1rem 0.3rem; border-radius: 3px; background: var(--color-border); color: var(--color-text-muted); }
+  .cc-notes { font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.4; }
+  .cc-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 0.35rem; border-top: 1px solid var(--color-border); }
+  .cc-credit { display: flex; flex-direction: column; gap: 0.05rem; }
+  .cc-submitter { font-size: 0.65rem; color: var(--color-text-muted); }
+  .cc-creator { font-size: 0.6rem; color: var(--color-text-muted); opacity: 0.7; }
+  .cc-actions { display: flex; gap: 0.3rem; }
+  .cc-action-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--color-border); border-radius: 5px; background: transparent; color: var(--color-text-muted); cursor: pointer; padding: 0; text-decoration: none; }
+  .cc-bookmark-btn { opacity: 0.4; cursor: default; }
 </style>
 
 <script>
-  document.querySelectorAll<HTMLButtonElement>(".cc-expand-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
+  document.querySelectorAll('.cc-expand-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
       const cardId = btn.dataset.expand;
       if (!cardId) return;
-      const shortEl = document.querySelector<HTMLElement>(`[data-card="${cardId}"]`);
-      const fullEl = document.querySelector<HTMLElement>(`[data-card-full="${cardId}"]`);
+      const shortEl = document.querySelector(`[data-card="${cardId}"]`);
+      const fullEl = document.querySelector(`[data-card-full="${cardId}"]`);
       if (!shortEl || !fullEl) return;
-
-      const isExpanded = fullEl.style.display !== "none";
-      if (isExpanded) {
-        shortEl.style.display = "";
-        fullEl.style.display = "none";
-        btn.textContent = "全表記";
-      } else {
-        shortEl.style.display = "none";
-        fullEl.style.display = "";
-        btn.textContent = "短縮";
-      }
+      const isExpanded = fullEl.style.display !== 'none';
+      shortEl.style.display = isExpanded ? '' : 'none';
+      fullEl.style.display = isExpanded ? 'none' : '';
+      btn.textContent = isExpanded ? '全表記' : '短縮';
     });
   });
 </script>

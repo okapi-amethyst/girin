@@ -1,0 +1,160 @@
+---
+import Base from "../layouts/Base.astro";
+import ComboCard from "./ComboCard.astro";
+import type { Character } from "../data/characters";
+import type { ComboData } from "../data/sample-combos";
+import { FUSE_SLUGS, scaleCrop, sidekickPointLabel } from "../data/pair-page";
+
+interface Props {
+  charA: Character;
+  charB: Character;
+  combos: ComboData[];
+  fuseSlug: string | null;
+  fuseLabel: string | null;
+}
+
+const { charA, charB, combos, fuseSlug, fuseLabel } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const pairBase = `${base}${charA.slug}/${charB.slug}/`;
+const currentFuse = fuseSlug || "none";
+const pageTitle = `${charA.nameJa} × ${charB.nameJa} コンボ | 2XKO GIRIN`;
+const pageDescription = `${charA.nameJa} × ${charB.nameJa} のコンボ一覧。難易度・状況でフィルタして自分に合ったコンボを探そう。`;
+---
+
+<Base title={pageTitle} description={pageDescription}>
+  <!-- TASK-08: 方針B。共通の静的OG画像 public/og-default.png を使用 -->
+  <div class="container page">
+    <nav class="breadcrumb">
+      <a href={base}>トップ</a>
+    </nav>
+
+    <header class="pair-header">
+      <div class="pair-icons">
+        {charA.crop ? (
+          <div class="pair-icon" data-size={scaleCrop(charA.crop).size} data-pos-x={scaleCrop(charA.crop).posX} data-pos-y={scaleCrop(charA.crop).posY} style={`background-image: url(${base}images/champions/600px-${charA.slug}.png);`} />
+        ) : (
+          <div class="pair-icon pair-icon-fallback"><span>{charA.nameJa[0]}</span></div>
+        )}
+        <span class="pair-x">×</span>
+        {charB.crop ? (
+          <div class="pair-icon" data-size={scaleCrop(charB.crop).size} data-pos-x={scaleCrop(charB.crop).posX} data-pos-y={scaleCrop(charB.crop).posY} style={`background-image: url(${base}images/champions/600px-${charB.slug}.png);`} />
+        ) : (
+          <div class="pair-icon pair-icon-fallback"><span>{charB.nameJa[0]}</span></div>
+        )}
+      </div>
+      <div class="pair-names">
+        <h1>{charA.nameJa} × {charB.nameJa}</h1>
+        {fuseLabel && (
+          <p class="fuse-current-label">
+            {fuseLabel}
+            {(fuseSlug === "sidekick" || fuseSlug === "sidekick-alt") && <span class="sidekick-dir">({sidekickPointLabel(fuseSlug, charA.nameJa, charB.nameJa)})</span>}
+          </p>
+        )}
+      </div>
+    </header>
+
+    <div class="pair-nav-links">
+      <a href={`${base}${charA.slug}/`} class="pair-nav-link">{charA.nameJa} のペアを探す</a>
+      <a href={`${base}${charB.slug}/`} class="pair-nav-link">{charB.nameJa} のペアを探す</a>
+    </div>
+
+    <nav class="fuse-nav" id="fuse-nav">
+      <a href={pairBase} class:list={["fuse-chip", { active: currentFuse === "none" }]}>ALL</a>
+      {FUSE_SLUGS.map((fuse) => (
+        <a href={`${pairBase}${fuse.slug}/`} class:list={["fuse-chip", { active: currentFuse === fuse.slug }]}>
+          {fuse.label}
+          {(fuse.slug === "sidekick" || fuse.slug === "sidekick-alt") && <span class="fuse-chip-sub">{sidekickPointLabel(fuse.slug, charA.nameJa, charB.nameJa)}</span>}
+        </a>
+      ))}
+    </nav>
+
+    <div class="headroom-nav" id="headroom-nav">
+      <a href={pairBase} class="headroom-nav-link">
+        {charA.nameJa} × {charB.nameJa}
+        {fuseLabel && <span class="headroom-nav-fuse">{fuseLabel}</span>}
+      </a>
+    </div>
+
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-row">
+        <div class="filter-group"><span class="filter-label">難易度</span><div class="filter-chips" data-filter="difficulty"><button class="chip chip-pulse" data-value="1" type="button">★ <span class="pulse-badge">Pulse</span></button><button class="chip chip-pulse" data-value="2" type="button">★★ <span class="pulse-badge">Pulse</span></button><button class="chip" data-value="3" type="button">★★★</button><button class="chip" data-value="4" type="button">★★★★</button><button class="chip" data-value="5" type="button">★★★★★</button></div></div>
+        <div class="filter-group"><span class="filter-label">始動</span><div class="filter-chips" data-filter="starter"><button class="chip" data-value="ground" type="button">地上</button><button class="chip" data-value="anti_air" type="button">対空</button><button class="chip" data-value="counter_hit" type="button">CH</button><button class="chip" data-value="throw" type="button">投げ</button><button class="chip" data-value="pressure_mixup" type="button">崩し</button></div></div>
+        <div class="filter-group"><span class="filter-label">位置</span><div class="filter-chips" data-filter="position"><button class="chip" data-value="center" type="button">中央</button><button class="chip" data-value="corner" type="button">端</button></div></div>
+        <div class="filter-group"><span class="filter-label">並び順</span><select class="sort-select" id="sort-select"><option value="practicality-desc">実用度順</option><option value="damage-desc">ダメージ順</option><option value="difficulty-asc">難易度順（易しい順）</option><option value="difficulty-desc">難易度順（難しい順）</option></select></div>
+        <button class="expand-toggle" id="filter-expand" type="button">その他 <span class="expand-icon" id="expand-icon">▼</span></button>
+      </div>
+      <div class="filter-panel" id="filter-panel" style="display:none;"><div class="filter-row"><label class="toggle-label"><input type="checkbox" data-filter="assist_used" />アシスト使用</label><label class="toggle-label"><input type="checkbox" data-filter="tag" />交代</label><label class="toggle-label"><input type="checkbox" data-filter="duo_only" />DUO限定</label></div><div class="filter-row filter-row-wide"><div class="filter-group"><span class="filter-label">Pゲージ</span><select data-filter="ult_gauge_point"><option value="">全て</option><option value="0">0</option><option value="1">1+</option></select></div><div class="filter-group"><span class="filter-label">Aゲージ</span><select data-filter="ult_gauge_assist"><option value="">全て</option><option value="0">0</option><option value="1">1+</option></select></div><div class="filter-group filter-group-tags"><span class="filter-label">タグ</span><div class="filter-chips filter-chips-wrap" data-filter="tags"><button class="chip" data-value="oki" type="button">起き攻め</button><button class="chip" data-value="corner_carry" type="button">端運び</button><button class="chip" data-value="side_switch" type="button">入替え</button><button class="chip" data-value="hkd" type="button">HKD</button><button class="chip" data-value="limit_strike" type="button">Limit Strike</button></div></div></div></div>
+    </div>
+
+    <div class="content-layout">
+      <div class="video-panel" id="video-panel" style="display:none;"><div class="vp-inner"><div class="vp-player"><iframe id="vp-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><div class="vp-info"><div class="vp-meta"><span class="vp-label" id="vp-label"></span><button class="vp-close" id="vp-close" type="button" title="閉じる">×</button></div><div class="vp-inputs"><code id="vp-inputs-code"></code></div></div></div></div>
+      <section class="combo-area"><div class="combo-list" id="combo-list">{combos.map((combo) => <ComboCard combo={combo} pointName={charA.nameJa} assistName={charB.nameJa} />)}</div><div class="combo-empty" id="combo-empty" style={combos.length > 0 ? "display:none;" : undefined}><p>まだコンボがありません</p><p class="combo-empty-sub">このペアのコンボを持っている方は Discord でシェアしてください！</p><a href="https://discord.gg/" class="combo-empty-link" target="_blank" rel="noreferrer">Discord サーバーに参加する</a></div><nav class="pagination" id="pagination" style="display:none;"><button class="pagination-btn" id="page-prev" type="button">前へ</button><span class="pagination-status" id="page-status">1 / 1</span><button class="pagination-btn" id="page-next" type="button">次へ</button></nav></section>
+    </div>
+  </div>
+</Base>
+
+<script>
+  import { initPairComboPage } from "../scripts/pair-combo-page";
+
+  initPairComboPage();
+</script>
+
+<style>
+  .page { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 960px; margin: 0 auto; }
+  .headroom-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--color-bg); border-bottom: 1px solid var(--color-border); padding: 0.4rem 0.75rem; display: flex; align-items: center; transform: translateY(-100%); transition: transform 0.25s ease; pointer-events: none; }
+  .headroom-nav.visible { transform: translateY(0); pointer-events: auto; }
+  .headroom-nav-link { font-size: 0.8rem; font-weight: 700; color: var(--color-text); display: inline-flex; align-items: center; gap: 0.4rem; }
+  .headroom-nav-fuse { font-size: 0.65rem; font-weight: 600; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.03em; }
+  .breadcrumb { font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .pair-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+  .pair-icons { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+  .pair-icon { width: 48px; height: 48px; border-radius: 50%; background-repeat: no-repeat; background-color: var(--color-border); }
+  .pair-icon-fallback { display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; color: var(--color-text-muted); }
+  .pair-x { font-size: 0.85rem; color: var(--color-text-muted); font-weight: 700; }
+  .pair-names h1 { font-size: 1.3rem; font-weight: 800; line-height: 1.2; }
+  .fuse-current-label { color: var(--color-accent); font-size: 0.85rem; font-weight: 600; margin-top: 0.15rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .sidekick-dir { color: var(--color-text-muted); font-weight: 400; font-size: 0.8rem; text-transform: none; }
+  .pair-nav-links { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .pair-nav-link { font-size: 0.75rem; color: var(--color-text-muted); border-bottom: 1px dashed var(--color-border); padding-bottom: 1px; }
+  .fuse-nav { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap; overflow-x: auto; }
+  .fuse-chip { display: inline-flex; flex-direction: column; align-items: center; padding: 0.35rem 0.7rem; border: 1px solid var(--color-border); border-radius: 6px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; color: var(--color-text-muted); background: var(--color-surface); line-height: 1.3; }
+  .fuse-chip.active { border-color: var(--color-accent); color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface)); }
+  .fuse-chip-sub { font-size: 0.55rem; font-weight: 400; color: var(--color-text-muted); }
+  .filter-bar { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.75rem; margin-bottom: 1.25rem; overflow-x: auto; }
+  .filter-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .filter-row-wide { align-items: flex-start; }
+  .filter-group { display: flex; align-items: center; gap: 0.35rem; }
+  .filter-group-tags { align-items: flex-start; }
+  .filter-label { font-size: 0.7rem; font-weight: 600; color: var(--color-text-muted); white-space: nowrap; }
+  .filter-chips { display: flex; gap: 0.2rem; }
+  .filter-chips-wrap { flex-wrap: wrap; }
+  .chip { padding: 0.2rem 0.5rem; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text-muted); font-size: 0.7rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; }
+  .chip.active { border-color: var(--color-accent); color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+  .pulse-badge { font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.05rem 0.25rem; border-radius: 2px; background: color-mix(in srgb, var(--color-danger) 20%, transparent); color: var(--color-danger); }
+  .sort-select, .filter-panel select { padding: 0.2rem 0.4rem; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text); font-size: 0.7rem; }
+  .expand-toggle { margin-left: auto; padding: 0.2rem 0.6rem; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text-muted); font-size: 0.7rem; cursor: pointer; }
+  .filter-panel { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 0.5rem; }
+  .toggle-label { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; color: var(--color-text-muted); cursor: pointer; }
+  .video-panel { position: sticky; top: 0; z-index: 150; overflow: hidden; border: 1px solid var(--color-accent); border-left: none; border-right: none; border-radius: 0; background: var(--color-surface); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); margin-left: -1rem; margin-right: -1rem; }
+  .vp-inner { display: flex; flex-direction: column; }
+  .vp-player { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
+  .vp-player iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  .vp-info { padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .vp-meta { display: flex; align-items: center; justify-content: space-between; }
+  .vp-label { font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted); }
+  .vp-close { width: 24px; height: 24px; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text-muted); font-size: 0.9rem; cursor: pointer; }
+  .vp-inputs { background: var(--color-bg); border-radius: 4px; padding: 0.4rem 0.6rem; overflow-x: auto; }
+  .vp-inputs code { font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", monospace; font-size: 0.8rem; color: #fbbf24; white-space: pre-wrap; word-break: break-all; line-height: 1.4; }
+  :global(.combo-card.playing) { border-color: var(--color-accent); }
+  .combo-area { min-height: 200px; }
+  .combo-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .combo-empty { text-align: center; padding: 3rem 1rem; color: var(--color-text-muted); }
+  .combo-empty p { font-size: 0.95rem; font-weight: 600; }
+  .combo-empty-sub { font-size: 0.8rem !important; font-weight: 400 !important; margin-top: 0.35rem; margin-bottom: 0.9rem; }
+  .combo-empty-link { display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1rem; border-radius: 8px; background: var(--color-accent); color: #0a0a0f; font-size: 0.85rem; font-weight: 700; }
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 1rem; }
+  .pagination-btn { border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: 6px; padding: 0.45rem 0.75rem; cursor: pointer; }
+  .pagination-btn:disabled { opacity: 0.45; cursor: default; }
+  .pagination-status { font-size: 0.8rem; color: var(--color-text-muted); }
+</style>
+

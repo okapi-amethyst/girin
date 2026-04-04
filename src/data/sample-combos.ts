@@ -1,12 +1,23 @@
 // サンプルコンボデータ（PROMPT_COMBO_DATA.md 準拠）
 // ペアページ表示確認用のダミーデータ
 
+export type Starter = "ground" | "anti_air" | "throw" | "pressure_mixup" | "counter_hit";
+export type Tag =
+  | "oki"
+  | "corner_carry"
+  | "side_switch"
+  | "fury"
+  | "hkd"
+  | "limit_strike"
+  | "crossup"
+  | "punish";
+
 export interface ComboData {
   id: number;
   point_character: number; // キャラマスターID
   assist_character: number | null;
   fuse: string;
-  starter: string;
+  starter: Starter;
   position: string;
   duo_only: boolean;
   tag: boolean;
@@ -16,23 +27,24 @@ export interface ComboData {
   ult_gauge_assist: number;
   inputs: string;
   damage: number;
-  tags: string[];
+  tags: Tag[];
   difficulty: number;
   practicality: number; // 自動算出（仮値）
   video_url: string;
   submitter_name: string;
   creator_name?: string;
   notes?: string;
+  recommended?: boolean;
 }
 
 // Ahri(1) × Yasuo(12) のサンプルコンボ
 export const sampleCombos: ComboData[] = [
   {
     id: 1,
-    point_character: 1, // Ahri
-    assist_character: 12, // Yasuo
+    point_character: 1,
+    assist_character: 12,
     fuse: "No Fuse",
-    starter: "地上ヒット",
+    starter: "ground",
     position: "center",
     duo_only: false,
     tag: false,
@@ -48,13 +60,14 @@ export const sampleCombos: ComboData[] = [
     video_url: "https://youtu.be/T8H_tluMRPA",
     submitter_name: "GIRINテスト",
     notes: "まずはこれだけ。M連打パルスコンボ。1ゲージ使用。",
+    recommended: true,
   },
   {
     id: 2,
     point_character: 1,
     assist_character: 12,
     fuse: "No Fuse",
-    starter: "地上ヒット",
+    starter: "ground",
     position: "center",
     duo_only: false,
     tag: false,
@@ -64,19 +77,20 @@ export const sampleCombos: ComboData[] = [
     ult_gauge_assist: 0,
     inputs: "5L > 5M > 2M > 5H > 236M",
     damage: 3100,
-    tags: ["起き攻め可"],
+    tags: ["oki"],
     difficulty: 2,
     practicality: 90,
     video_url: "https://youtube.com/watch?v=example2&t=15",
     submitter_name: "GIRINテスト",
     notes: "パルス使いつつボタンを押し分ける。起き攻めに行ける。",
+    recommended: true,
   },
   {
     id: 3,
     point_character: 1,
     assist_character: 12,
     fuse: "Double Down",
-    starter: "地上ヒット",
+    starter: "ground",
     position: "center",
     duo_only: true,
     tag: true,
@@ -86,7 +100,7 @@ export const sampleCombos: ComboData[] = [
     ult_gauge_assist: 0,
     inputs: "5L > 5M > 5H > Assist > 66 > Tag > 5M > 5H > 236H",
     damage: 4200,
-    tags: ["入替え", "端運び"],
+    tags: ["side_switch", "corner_carry"],
     difficulty: 3,
     practicality: 75,
     video_url: "https://youtube.com/watch?v=example3&t=45",
@@ -99,7 +113,7 @@ export const sampleCombos: ComboData[] = [
     point_character: 1,
     assist_character: 12,
     fuse: "Double Down",
-    starter: "対空",
+    starter: "anti_air",
     position: "corner",
     duo_only: true,
     tag: false,
@@ -109,7 +123,7 @@ export const sampleCombos: ComboData[] = [
     ult_gauge_assist: 0,
     inputs: "2H > jM > jH > Assist > 5H > 236H > Super",
     damage: 5100,
-    tags: ["起き攻め可"],
+    tags: ["oki", "hkd"],
     difficulty: 4,
     practicality: 50,
     video_url: "https://youtube.com/watch?v=example4&t=60",
@@ -118,10 +132,10 @@ export const sampleCombos: ComboData[] = [
   },
   {
     id: 5,
-    point_character: 12, // Yasuo point
+    point_character: 12,
     assist_character: 1,
     fuse: "Double Down",
-    starter: "地上ヒット",
+    starter: "counter_hit",
     position: "center",
     duo_only: true,
     tag: true,
@@ -131,7 +145,7 @@ export const sampleCombos: ComboData[] = [
     ult_gauge_assist: 1,
     inputs: "5L > 5M > 236L > Assist > 66 > Tag > 5M > 2H > jH > Super",
     damage: 5800,
-    tags: ["入替え", "起き攻め可", "端運び"],
+    tags: ["side_switch", "oki", "corner_carry", "limit_strike"],
     difficulty: 5,
     practicality: 30,
     video_url: "https://youtube.com/watch?v=example5&t=90",

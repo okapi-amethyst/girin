@@ -16,18 +16,14 @@ interface Props {
 
 const { char } = Astro.props;
 const base = import.meta.env.BASE_URL;
-
-// 相方候補 = 自分以外の全キャラ
 const partners = characters.filter((c) => c.slug !== char.slug);
 
-// Wiki crop スケーリング用
 function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
   const size = parseInt(crop.bgSize);
   const parts = crop.bgPosition.match(/-?\d+/g)?.map(Number) || [0, 0];
   return { size, posX: parts[0], posY: parts[1] };
 }
 
-// ペアURL生成（id順で小さい方が先）
 function pairUrl(a: Character, b: Character): string {
   const charA = characters.indexOf(a);
   const charB = characters.indexOf(b);
@@ -38,7 +34,10 @@ function pairUrl(a: Character, b: Character): string {
 }
 ---
 
-<Base title={`${char.nameJa} — 2XKO GIRIN`}>
+<Base
+  title={`${char.nameJa} コンボ | 2XKO GIRIN`}
+  description={`${char.nameJa}のコンボ一覧。相方を選んで自分に合ったルートを探そう。`}
+>
   <div class="container page">
     <nav class="breadcrumb">
       <a href={base}>トップ</a>
@@ -66,7 +65,6 @@ function pairUrl(a: Character, b: Character): string {
       </div>
     </header>
 
-    <!-- 相方選択 -->
     <section class="partner-section">
       <h2 class="section-title">相方を選ぶ</h2>
       <div class="partner-grid">
@@ -94,7 +92,6 @@ function pairUrl(a: Character, b: Character): string {
       </div>
     </section>
 
-    <!-- Juggernaut（相方選択の下、控えめに） -->
     <section class="juggernaut-section">
       <a href={`${base}${char.slug}/juggernaut/`} class="juggernaut-link">
         <img
@@ -194,7 +191,6 @@ function pairUrl(a: Character, b: Character): string {
     font-size: 0.9rem;
   }
 
-  /* セクション共通 */
   .section-title {
     font-size: 1rem;
     font-weight: 700;
@@ -202,7 +198,6 @@ function pairUrl(a: Character, b: Character): string {
     letter-spacing: 0.03em;
   }
 
-  /* Juggernaut（控えめリンク） */
   .juggernaut-section {
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
@@ -249,7 +244,6 @@ function pairUrl(a: Character, b: Character): string {
     color: var(--color-text-muted);
   }
 
-  /* 相方選択 */
   .partner-section {
     margin-bottom: 1rem;
   }
@@ -316,7 +310,6 @@ function pairUrl(a: Character, b: Character): string {
     text-overflow: ellipsis;
   }
 
-  /* Coming Soon リンク */
   .coming-soon-links {
     display: flex;
     gap: 0.75rem;

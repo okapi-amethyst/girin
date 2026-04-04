@@ -2,18 +2,14 @@
 import Base from "../layouts/Base.astro";
 import { characters } from "../data/characters";
 
-// Wiki値は180px幅カード基準。スケール比率をCSS変数で渡す
-const WIKI_REF_WIDTH = 180;
-
 function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
-  // パース: "400px" -> 400, "-65px -10px" -> [-65, -10]
   const size = parseInt(crop.bgSize);
   const parts = crop.bgPosition.match(/-?\d+/g)?.map(Number) || [0, 0];
   return { size, posX: parts[0], posY: parts[1] };
 }
 ---
 
-<Base title="2XKO GIRIN">
+<Base title="2XKO コンボ集 | GIRIN">
   <section class="hero">
     <div class="container">
       <p class="hero-sub">今のあなたに最適なコンボがみつかるかも</p>
@@ -22,9 +18,12 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
 
   <section class="nav-links">
     <div class="container nav-links-row">
-      <a href={`${import.meta.env.BASE_URL}random/`} class="nav-link-card">
-        <span class="nav-link-label">Random Combo</span>
-        <span class="nav-link-desc">今日のおすすめ</span>
+      <a href="#" class="nav-link-card nav-link-disabled">
+        <span class="nav-link-label">
+          New Arrivals
+          <span class="badge-coming-soon">Coming Soon</span>
+        </span>
+        <span class="nav-link-desc">新着コンボ</span>
       </a>
       <a href={`${import.meta.env.BASE_URL}mycombo/`} class="nav-link-card nav-link-disabled">
         <span class="nav-link-label">
@@ -73,7 +72,6 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
 </Base>
 
 <script>
-  // キャラポートレートのクロップをカード幅に合わせてスケーリング
   const WIKI_REF = 180;
   function scalePortraits() {
     document.querySelectorAll<HTMLElement>('.char-portrait[data-size]').forEach(el => {
