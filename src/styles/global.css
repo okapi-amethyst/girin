@@ -63,3 +63,65 @@ a:hover {
   margin: 0 auto;
   padding: 0 1rem;
 }
+
+/* ===== Ad Sidebars =====
+   コンテンツ幅 960px + 左右各 160px + gap 20px×2 = 1360px 以上で表示。
+   position: fixed のためレイアウトフローには影響しない。
+   左サイドバーは将来のナビゲーション利用に転用できるよう独立クラスで定義。
+   z-index は headroom-nav (200) より低い 10 に設定。
+   ======================================================== */
+.ad-sidebar {
+  display: none;
+  position: fixed;
+  top: 64px; /* サイトヘッダー高さ（~52px）+ 余白 */
+  width: 160px;
+  z-index: 10;
+}
+
+@media (min-width: 1360px) {
+  .ad-sidebar-left {
+    display: block;
+    /* コンテナ中心(50%) からコンテナ半幅(480px) + gap(20px) 分だけ左へ */
+    right: calc(50% + 480px + 20px);
+  }
+  .ad-sidebar-right {
+    display: block;
+    /* コンテナ中心(50%) からコンテナ半幅(480px) + gap(20px) 分だけ右へ */
+    left: calc(50% + 480px + 20px);
+  }
+}
+
+.ad-placeholder {
+  width: 160px;
+  height: 600px; /* Wide Skyscraper 標準サイズ */
+  border: 1px dashed var(--color-border);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: var(--color-surface);
+  opacity: 0.45;
+  pointer-events: none; /* Phase 1 では何もしない */
+}
+
+.ad-placeholder-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.ad-placeholder-size {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  font-family: monospace;
+}
+
+.ad-placeholder-note {
+  font-size: 0.55rem;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}

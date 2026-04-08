@@ -28,6 +28,7 @@ export interface Character {
 // Wiki 180x150 基準のクロップ値。表示時にカードサイズに合わせてスケーリングする
 const cropMap: Record<string, CropData> = {
   ahri:       { bgSize: "400px", bgPosition: "-65px -10px" },
+  akali:      { bgSize: "400px", bgPosition: "-30px -60px" },
   blitzcrank: { bgSize: "500px", bgPosition: "-160px 4px" },
   braum:      { bgSize: "460px", bgPosition: "-190px -44px" },
   caitlyn:    { bgSize: "400px", bgPosition: "-100px 0px" },
@@ -47,7 +48,7 @@ function withCrop(char: { name: string; nameJa: string; slug: string; combos: Co
 
 export const characters: Character[] = [
   withCrop(ahriData),
-  { name: "Akali", nameJa: "アカリ", slug: "akali", combos: [] },
+  withCrop({ name: "Akali", nameJa: "アカリ", slug: "akali", combos: [] }),
   withCrop({ name: "Blitzcrank", nameJa: "ブリッツクランク", slug: "blitzcrank", combos: [] }),
   withCrop({ name: "Braum", nameJa: "ブラウム", slug: "braum", combos: [] }),
   withCrop({ name: "Caitlyn", nameJa: "ケイトリン", slug: "caitlyn", combos: [] }),

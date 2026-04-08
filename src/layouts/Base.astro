@@ -48,18 +48,9 @@ const currentUrl = Astro.url.toString();
           <span class="logo-text">GIRIN</span>
         </a>
         <span class="site-badge">2XKO</span>
-        <a href="#" class="header-link is-disabled" aria-disabled="true">
-          New Arrivals
-          <span class="header-badge">Coming Soon</span>
-        </a>
-        <a href="#" class="header-link is-disabled" aria-disabled="true">
-          My Combos
-          <span class="header-badge">Coming Soon</span>
-        </a>
-        <button class="header-icon-btn" id="share-button" type="button" aria-label="ページを共有">
-          Share
-        </button>
-        <span class="share-feedback" id="share-feedback" aria-live="polite"></span>
+        <span class="header-link is-disabled header-nav-start"><s>新着</s></span>
+        <span class="header-link is-disabled"><s>My Combos</s></span>
+        <span class="header-link is-disabled"><s>コンボ投稿</s></span>
         <button class="header-icon-btn is-disabled" type="button" aria-label="検索" disabled>
           Search
         </button>
@@ -98,6 +89,26 @@ const currentUrl = Astro.url.toString();
         </div>
       </div>
     </footer>
+    <!--
+      広告サイドバー（Phase 2〜 実装予定）
+      ・1360px 以上の viewport でのみ表示（global.css で制御）
+      ・左サイドバーは将来のナビゲーション / メニュー利用への転用も想定
+      ・Phase 2 移行時: .ad-placeholder を AdSense タグに差し替える
+    -->
+    <aside class="ad-sidebar ad-sidebar-left" aria-label="広告スペース（左）" aria-hidden="true">
+      <div class="ad-placeholder">
+        <span class="ad-placeholder-label">広告</span>
+        <span class="ad-placeholder-size">160 × 600</span>
+        <span class="ad-placeholder-note">Phase 2〜</span>
+      </div>
+    </aside>
+    <aside class="ad-sidebar ad-sidebar-right" aria-label="広告スペース（右）" aria-hidden="true">
+      <div class="ad-placeholder">
+        <span class="ad-placeholder-label">広告</span>
+        <span class="ad-placeholder-size">160 × 600</span>
+        <span class="ad-placeholder-note">Phase 2〜</span>
+      </div>
+    </aside>
   </body>
 </html>
 
@@ -110,30 +121,15 @@ const currentUrl = Astro.url.toString();
     localStorage.setItem('theme', next);
   });
 
-  const shareButton = document.getElementById('share-button');
-  const shareFeedback = document.getElementById('share-feedback');
-  let shareTimer;
-
-  shareButton?.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      if (shareFeedback) {
-        shareFeedback.textContent = 'コピーしました';
-        window.clearTimeout(shareTimer);
-        shareTimer = window.setTimeout(() => {
-          shareFeedback.textContent = '';
-        }, 1800);
-      }
-    } catch {
-      if (shareFeedback) {
-        shareFeedback.textContent = 'コピーに失敗しました';
-      }
-    }
-  });
 </script>
 
-<style>
+<!-- global.css は is:global で読み込む。scoped style 内の @import だと
+     <slot> 経由のページ要素（index.astro 等）に .container などが効かないため。 -->
+<style is:global>
   @import "../styles/global.css";
+</style>
+
+<style>
 
   .site-header {
     border-bottom: 1px solid var(--color-border);
@@ -223,8 +219,11 @@ const currentUrl = Astro.url.toString();
     color: var(--color-accent);
   }
 
-  .theme-toggle {
+  .header-nav-start {
     margin-left: auto;
+  }
+
+  .theme-toggle {
     background: none;
     border: 1px solid var(--color-border);
     border-radius: 6px;

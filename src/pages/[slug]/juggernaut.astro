@@ -107,16 +107,9 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
       </div>
     </section>
 
-    <section class="coming-soon-links">
-      <a href={`${base}mycombo/`} class="cs-link">
-        My Combos
-        <span class="badge-coming-soon">Coming Soon</span>
-      </a>
-      <a href="#" class="cs-link">
-        Submit Combo
-        <span class="badge-coming-soon">Coming Soon</span>
-      </a>
-    </section>
+    <div class="back-to-top">
+      <a href={base}>← トップに戻る</a>
+    </div>
   </div>
 </Base>
 
@@ -166,7 +159,7 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
   .combo-empty p { font-size: 0.95rem; font-weight: 600; }
   .combo-empty-sub { font-size: 0.8rem !important; font-weight: 400 !important; margin-top: 0.35rem; }
 
-  .coming-soon-links { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
-  .cs-link { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; color: var(--color-text-muted); font-size: 0.85rem; font-weight: 600; pointer-events: none; opacity: 0.7; }
-  .badge-coming-soon { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.15rem 0.4rem; border-radius: 3px; background: var(--color-border); color: var(--color-text-muted); }
+  .back-to-top { margin-top: 2rem; font-size: 0.85rem; }
+  .back-to-top a { color: var(--color-text-muted); }
+  .back-to-top a:hover { color: var(--color-text); }
 </style>

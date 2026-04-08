@@ -20,30 +20,31 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
     <div class="container nav-links-row">
       <a href="#" class="nav-link-card nav-link-disabled">
         <span class="nav-link-label">
-          New Arrivals
+          新着コンボ
           <span class="badge-coming-soon">Coming Soon</span>
         </span>
-        <span class="nav-link-desc">新着コンボ</span>
+        <span class="nav-link-desc">最近追加されたコンボ</span>
       </a>
       <a href={`${import.meta.env.BASE_URL}mycombo/`} class="nav-link-card nav-link-disabled">
         <span class="nav-link-label">
           My Combos
           <span class="badge-coming-soon">Coming Soon</span>
         </span>
-        <span class="nav-link-desc">ブックマーク</span>
+        <span class="nav-link-desc">お気に入りを保存・管理</span>
       </a>
       <a href="#" class="nav-link-card nav-link-disabled">
         <span class="nav-link-label">
-          Submit Combo
+          コンボ投稿
           <span class="badge-coming-soon">Coming Soon</span>
         </span>
-        <span class="nav-link-desc">コンボ投稿</span>
+        <span class="nav-link-desc">コンボを共有する</span>
       </a>
     </div>
   </section>
 
   <section class="characters">
     <div class="container">
+      <h2 class="char-grid-title">コンボを調べたいチャンピオンを選択</h2>
       <div class="char-grid">
         {characters.map((char) => {
           const crop = char.crop ? scaleCrop(char.crop) : null;
@@ -66,6 +67,13 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
             </a>
           );
         })}
+      </div>
+
+      <!-- 広告スロット: キャラグリッド下 (Phase 2〜 AdSense に差し替え) -->
+      <div class="ad-inline-placeholder" aria-hidden="true">
+        <span class="ad-inline-label">広告</span>
+        <span class="ad-inline-size">336 × 280</span>
+        <span class="ad-inline-note">Phase 2〜</span>
       </div>
     </div>
   </section>
@@ -163,6 +171,13 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
     padding: 0 0 1rem;
   }
 
+  .char-grid-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.75rem;
+  }
+
   .char-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -178,7 +193,7 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
 
   @media (min-width: 960px) {
     .char-grid {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
     }
   }
 
@@ -223,5 +238,50 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /* グリッド下インライン広告プレースホルダー */
+  .ad-inline-placeholder {
+    margin-top: 1.25rem;
+    width: 336px;
+    height: 280px;
+    max-width: 100%;
+    border: 1px dashed var(--color-border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    background: var(--color-surface);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* PC 幅ではサイドバー広告が出るためインライン広告は非表示 */
+  @media (min-width: 1360px) {
+    .ad-inline-placeholder {
+      display: none;
+    }
+  }
+
+  .ad-inline-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+  }
+
+  .ad-inline-size {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    font-family: monospace;
+  }
+
+  .ad-inline-note {
+    font-size: 0.55rem;
+    color: var(--color-text-muted);
+    opacity: 0.7;
   }
 </style>

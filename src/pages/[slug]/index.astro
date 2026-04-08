@@ -66,7 +66,22 @@ function pairUrl(a: Character, b: Character): string {
     </header>
 
     <section class="partner-section">
-      <h2 class="section-title">相方を選ぶ</h2>
+      <div class="section-header">
+        <h2 class="section-title">パートナーチャンピオンを選択</h2>
+        <a href={`${base}${char.slug}/juggernaut/`} class="juggernaut-link">
+          <img
+            src={`${base}images/fuses/Juggernaut_fuse_360.png`}
+            alt="JUGGERNAUT"
+            class="juggernaut-fuse-icon"
+            width="28"
+            height="28"
+          />
+          <span class="juggernaut-link-text">
+            <span class="juggernaut-link-name">{char.nameJa} JUGGERNAUT</span>
+            <span class="juggernaut-link-desc">ソロFuseコンボ</span>
+          </span>
+        </a>
+      </div>
       <div class="partner-grid">
         {partners.map((p) => {
           const crop = p.crop ? scaleCrop(p.crop) : null;
@@ -92,32 +107,9 @@ function pairUrl(a: Character, b: Character): string {
       </div>
     </section>
 
-    <section class="juggernaut-section">
-      <a href={`${base}${char.slug}/juggernaut/`} class="juggernaut-link">
-        <img
-          src={`${base}images/fuses/Juggernaut_fuse_360.png`}
-          alt="JUGGERNAUT"
-          class="juggernaut-fuse-icon"
-          width="28"
-          height="28"
-        />
-        <span class="juggernaut-link-text">
-          <span class="juggernaut-link-name">{char.nameJa} JUGGERNAUT</span>
-          <span class="juggernaut-link-desc">ソロFuseコンボ</span>
-        </span>
-      </a>
-    </section>
-
-    <section class="coming-soon-links">
-      <a href={`${base}mycombo/`} class="cs-link">
-        My Combos
-        <span class="badge-coming-soon">Coming Soon</span>
-      </a>
-      <a href="#" class="cs-link">
-        Submit Combo
-        <span class="badge-coming-soon">Coming Soon</span>
-      </a>
-    </section>
+    <div class="back-to-top">
+      <a href={base}>← トップに戻る</a>
+    </div>
   </div>
 </Base>
 
@@ -191,16 +183,17 @@ function pairUrl(a: Character, b: Character): string {
     font-size: 0.9rem;
   }
 
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
   .section-title {
     font-size: 1rem;
     font-weight: 700;
-    margin-bottom: 0.75rem;
     letter-spacing: 0.03em;
-  }
-
-  .juggernaut-section {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
   }
 
   .juggernaut-link {
@@ -263,7 +256,7 @@ function pairUrl(a: Character, b: Character): string {
 
   @media (min-width: 960px) {
     .partner-grid {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
     }
   }
 
@@ -310,36 +303,16 @@ function pairUrl(a: Character, b: Character): string {
     text-overflow: ellipsis;
   }
 
-  .coming-soon-links {
-    display: flex;
-    gap: 0.75rem;
+  .back-to-top {
     margin-top: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .cs-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    color: var(--color-text-muted);
     font-size: 0.85rem;
-    font-weight: 600;
-    pointer-events: none;
-    opacity: 0.7;
   }
 
-  .badge-coming-soon {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
-    background: var(--color-border);
+  .back-to-top a {
     color: var(--color-text-muted);
+  }
+
+  .back-to-top a:hover {
+    color: var(--color-text);
   }
 </style>
