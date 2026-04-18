@@ -110,11 +110,18 @@ function pairUrl(a: Character, b: Character): string {
     <div class="back-to-top">
       <a href={base}>← トップに戻る</a>
     </div>
+
+    <!-- 広告スロット: ページ末尾 (Phase 2〜 AdSense に差し替え) -->
+    <div class="ad-inline-placeholder" aria-hidden="true">
+      <span class="ad-inline-label">広告</span>
+      <span class="ad-inline-size">336 × 280</span>
+      <span class="ad-inline-note">Phase 2〜</span>
+    </div>
   </div>
 </Base>
 
 <script>
-  const WIKI_REF = 180;
+  const WIKI_REF = 180; // キャラ画像の参照元（2XKO Wiki）の基準サイズ (px)
   function scalePortraits() {
     document.querySelectorAll<HTMLElement>('[data-size]').forEach(el => {
       const w = el.clientWidth;
@@ -314,5 +321,50 @@ function pairUrl(a: Character, b: Character): string {
 
   .back-to-top a:hover {
     color: var(--color-text);
+  }
+
+  .ad-inline-placeholder {
+    margin-top: 1.25rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 336px;
+    height: 280px;
+    max-width: 100%;
+    border: 1px dashed var(--color-border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    background: var(--color-surface);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  @media (min-width: 1360px) {
+    .ad-inline-placeholder {
+      display: none;
+    }
+  }
+
+  .ad-inline-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+  }
+
+  .ad-inline-size {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    font-family: monospace;
+  }
+
+  .ad-inline-note {
+    font-size: 0.55rem;
+    color: var(--color-text-muted);
+    opacity: 0.7;
   }
 </style>

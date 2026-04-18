@@ -10,14 +10,13 @@ type PairCardModel = {
   ultGaugePoint: number;
   ultGaugeAssist: number;
   tags: string[];
-  practicality: number;
   damage: number;
 };
 
 type PairPageState = {
   difficulty: Set<string>;
-  starter: Set<string>;
-  position: Set<string>;
+  starter: string;
+  position: string;
   tags: Set<string>;
   assist_used: boolean;
   tag: boolean;
@@ -36,9 +35,9 @@ export function initPairComboPage() {
   const filterBar = document.getElementById('filter-bar');
   if (!filterBar) return;
 
-  const WIKI_REF = 180;
-  const PAGE_SIZE = 5;
-  const HEADROOM_HEIGHT = 34;
+  const WIKI_REF = 180;        // キャラ画像の参照元（2XKO Wiki）の基準サイズ (px)
+  const PAGE_SIZE = 5;         // 1ページあたりのコンボ表示件数
+  const HEADROOM_HEIGHT = 34;  // headroom-nav の高さ (px)。動画パネルの top オフセットに使用
   const headroomNav = document.getElementById('headroom-nav');
   const comboEmpty = document.getElementById('combo-empty');
   const pagination = document.getElementById('pagination');
@@ -64,21 +63,20 @@ export function initPairComboPage() {
     ultGaugePoint: Number(card.dataset.ultGaugePoint || 0),
     ultGaugeAssist: Number(card.dataset.ultGaugeAssist || 0),
     tags: (card.dataset.tags || '').split(',').filter(Boolean),
-    practicality: Number(card.dataset.practicality || 0),
     damage: Number(card.dataset.damage || 0),
   }));
 
   const state: PairPageState = {
     difficulty: new Set(),
-    starter: new Set(),
-    position: new Set(),
+    starter: '',
+    position: '',
     tags: new Set(),
     assist_used: false,
     tag: false,
     duo_only: false,
     ult_gauge_point: '',
     ult_gauge_assist: '',
-    sort: 'practicality-desc',
+    sort: 'difficulty-asc',
     page: 1,
   };
 
@@ -160,7 +158,7 @@ export function initPairComboPage() {
 
     vpIframe.src = toEmbedUrl(videoUrl);
     vpInputsCode.textContent = inputs;
-    vpLabel.textContent = `#${comboId}  ${'★'.repeat(Number(difficulty)) + '☆'.repeat(5 - Number(difficulty))}  ${Number(damage).toLocaleString()} dmg`;
+    vpLabel.textContent = `#${comboId}  ${'★'.repeat(Number(difficulty)) + '☆'.repeat(5 - Number(difficulty))}  ${Number(damage).toLocaleString()} dmg`; // 5: 難易度の最大段数
     videoPanel.style.display = '';
     document.querySelectorAll('.combo-card.playing').forEach((item) => item.classList.remove('playing'));
     card.classList.add('playing');
@@ -176,15 +174,15 @@ export function initPairComboPage() {
     };
 
     setParam('difficulty', state.difficulty);
-    setParam('starter', state.starter);
-    setParam('position', state.position);
+    if (state.starter) params.set('starter', state.starter);
+    if (state.position) params.set('position', state.position);
     setParam('tags', state.tags);
     if (state.assist_used) params.set('assist_used', '1');
     if (state.tag) params.set('tag', '1');
     if (state.duo_only) params.set('duo_only', '1');
     if (state.ult_gauge_point) params.set('ult_gauge_point', state.ult_gauge_point);
     if (state.ult_gauge_assist) params.set('ult_gauge_assist', state.ult_gauge_assist);
-    if (state.sort !== 'practicality-desc') params.set('sort', state.sort);
+    if (state.sort !== 'difficulty-asc') params.set('sort', state.sort);
     if (state.page > 1) params.set('page', String(state.page));
     return params;
   };
@@ -212,15 +210,15 @@ export function initPairComboPage() {
     };
 
     readSet('difficulty', state.difficulty);
-    readSet('starter', state.starter);
-    readSet('position', state.position);
+    state.starter = params.get('starter') || '';
+    state.position = params.get('position') || '';
     readSet('tags', state.tags);
     state.assist_used = params.get('assist_used') === '1';
     state.tag = params.get('tag') === '1';
     state.duo_only = params.get('duo_only') === '1';
     state.ult_gauge_point = params.get('ult_gauge_point') || '';
     state.ult_gauge_assist = params.get('ult_gauge_assist') || '';
-    state.sort = params.get('sort') || 'practicality-desc';
+    state.sort = params.get('sort') || 'difficulty-asc';
     state.page = Math.max(1, Number(params.get('page') || '1'));
   };
 
@@ -231,11 +229,7 @@ export function initPairComboPage() {
         const value = chip.dataset.value || '';
         const active = filter === 'difficulty'
           ? state.difficulty.has(value)
-          : filter === 'starter'
-            ? state.starter.has(value)
-            : filter === 'position'
-              ? state.position.has(value)
-              : state.tags.has(value);
+          : state.tags.has(value);
         chip.classList.toggle('active', active);
       });
     });
@@ -253,23 +247,22 @@ export function initPairComboPage() {
 
   const matches = (card: PairCardModel) => !(
     (state.difficulty.size > 0 && !state.difficulty.has(String(card.difficulty))) ||
-    (state.starter.size > 0 && !state.starter.has(card.starter)) ||
-    (state.position.size > 0 && !state.position.has(card.position)) ||
+    (state.starter !== '' && state.starter !== card.starter) ||
+    (state.position !== '' && state.position !== card.position) ||
     (state.tags.size > 0 && !Array.from(state.tags).some((tag) => card.tags.includes(tag))) ||
     (state.assist_used && !card.assistUsed) ||
     (state.tag && !card.tag) ||
     (state.duo_only && !card.duoOnly) ||
-    (state.ult_gauge_point === '0' && card.ultGaugePoint !== 0) ||
-    (state.ult_gauge_point === '1' && card.ultGaugePoint < 1) ||
-    (state.ult_gauge_assist === '0' && card.ultGaugeAssist !== 0) ||
-    (state.ult_gauge_assist === '1' && card.ultGaugeAssist < 1)
+    (state.ult_gauge_point !== '' && card.ultGaugePoint > Number(state.ult_gauge_point)) ||
+    (state.ult_gauge_assist !== '' && card.ultGaugeAssist > Number(state.ult_gauge_assist))
   );
 
   const sortCards = (cards: PairCardModel[]) => [...cards].sort((a, b) => {
     if (state.sort === 'damage-desc') return b.damage - a.damage || a.id - b.id;
-    if (state.sort === 'difficulty-asc') return a.difficulty - b.difficulty || b.practicality - a.practicality;
+    if (state.sort === 'difficulty-asc') return a.difficulty - b.difficulty || b.damage - a.damage;
     if (state.sort === 'difficulty-desc') return b.difficulty - a.difficulty || b.damage - a.damage;
-    return b.practicality - a.practicality || b.damage - a.damage;
+    if (state.sort === 'id-desc') return b.id - a.id;
+    return a.difficulty - b.difficulty || b.damage - a.damage; // fallback: difficulty-asc
   });
 
   const renderCards = () => {
@@ -293,6 +286,7 @@ export function initPairComboPage() {
     }
 
     syncUrl();
+    syncUiFromState();
   };
 
   document.getElementById('filter-expand')?.addEventListener('click', () => {
@@ -308,13 +302,7 @@ export function initPairComboPage() {
     group.querySelectorAll<HTMLElement>('.chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         const value = chip.dataset.value || '';
-        const target = filter === 'difficulty'
-          ? state.difficulty
-          : filter === 'starter'
-            ? state.starter
-            : filter === 'position'
-              ? state.position
-              : state.tags;
+        const target = filter === 'difficulty' ? state.difficulty : state.tags;
         target.has(value) ? target.delete(value) : target.add(value);
         state.page = 1;
         renderCards();
@@ -333,7 +321,7 @@ export function initPairComboPage() {
 
   document.querySelectorAll<HTMLSelectElement>('select[data-filter]').forEach((select) => {
     select.addEventListener('change', () => {
-      const key = select.dataset.filter as 'ult_gauge_point' | 'ult_gauge_assist';
+      const key = select.dataset.filter as 'starter' | 'position' | 'ult_gauge_point' | 'ult_gauge_assist';
       state[key] = select.value;
       state.page = 1;
       renderCards();

@@ -15,6 +15,7 @@ interface Props {
 
 const { charA, charB, combos, fuseSlug, fuseLabel } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const isSidekick = fuseSlug === 'sidekick' || fuseSlug === 'sidekick-alt';
 const pairBase = `${base}${charA.slug}/${charB.slug}/`;
 const currentFuse = fuseSlug || "none";
 const pageTitle = `${charA.nameJa} × ${charB.nameJa} コンボ | 2XKO GIRIN`;
@@ -26,6 +27,16 @@ const pageDescription = `${charA.nameJa} × ${charB.nameJa} のコンボ一覧�
   <div class="container page">
     <nav class="breadcrumb">
       <a href={base}>トップ</a>
+      <span>/</span>
+      {fuseSlug ? (
+        <>
+          <a href={pairBase}>{charA.nameJa} × {charB.nameJa}</a>
+          <span>/</span>
+          <span>{fuseLabel}</span>
+        </>
+      ) : (
+        <span>{charA.nameJa} × {charB.nameJa}</span>
+      )}
     </nav>
 
     <header class="pair-header">
@@ -69,21 +80,23 @@ const pageDescription = `${charA.nameJa} × ${charB.nameJa} のコンボ一覧�
     </nav>
 
     <div class="headroom-nav" id="headroom-nav">
-      <a href={pairBase} class="headroom-nav-link">
-        {charA.nameJa} × {charB.nameJa}
-        {fuseLabel && <span class="headroom-nav-fuse">{fuseLabel}</span>}
-      </a>
+      <div class="headroom-nav-inner">
+        <a href={pairBase} class="headroom-nav-link">
+          {charA.nameJa} × {charB.nameJa}
+          {fuseLabel && <span class="headroom-nav-fuse">{fuseLabel}</span>}
+        </a>
+      </div>
     </div>
 
     <div class="filter-bar" id="filter-bar">
       <div class="filter-row">
         <div class="filter-group"><span class="filter-label">難易度</span><div class="filter-chips" data-filter="difficulty"><button class="chip chip-pulse" data-value="1" type="button">★ <span class="pulse-badge">Pulse</span></button><button class="chip chip-pulse" data-value="2" type="button">★★ <span class="pulse-badge">Pulse</span></button><button class="chip" data-value="3" type="button">★★★</button><button class="chip" data-value="4" type="button">★★★★</button><button class="chip" data-value="5" type="button">★★★★★</button></div></div>
-        <div class="filter-group"><span class="filter-label">始動</span><div class="filter-chips" data-filter="starter"><button class="chip" data-value="ground" type="button">地上</button><button class="chip" data-value="anti_air" type="button">対空</button><button class="chip" data-value="counter_hit" type="button">CH</button><button class="chip" data-value="throw" type="button">投げ</button><button class="chip" data-value="pressure_mixup" type="button">崩し</button></div></div>
-        <div class="filter-group"><span class="filter-label">位置</span><div class="filter-chips" data-filter="position"><button class="chip" data-value="center" type="button">中央</button><button class="chip" data-value="corner" type="button">端</button></div></div>
-        <div class="filter-group"><span class="filter-label">並び順</span><select class="sort-select" id="sort-select"><option value="practicality-desc">実用度順</option><option value="damage-desc">ダメージ順</option><option value="difficulty-asc">難易度順（易しい順）</option><option value="difficulty-desc">難易度順（難しい順）</option></select></div>
+        <div class="filter-group"><span class="filter-label">始動</span><select class="sort-select" data-filter="starter"><option value="">すべて</option><option value="ground">地上</option><option value="anti_air">対空</option><option value="pressure_mixup">崩し</option>{!isSidekick && <option value="tag_launcher">タッグランチャー始動</option>}</select></div>
+        <div class="filter-group"><span class="filter-label">位置</span><select class="sort-select" data-filter="position"><option value="">位置限定なし</option><option value="center">中央</option><option value="near_corner">端寄り</option><option value="corner">端</option><option value="near_corner_back">端寄り(背)</option><option value="corner_back">端(背)</option></select></div>
+        <div class="filter-group"><span class="filter-label">並び順</span><select class="sort-select" id="sort-select"><option value="difficulty-asc">難易度順（易しい順）</option><option value="damage-desc">ダメージ順</option><option value="difficulty-desc">難易度順（難しい順）</option><option value="id-desc">新着順</option></select></div>
         <button class="expand-toggle" id="filter-expand" type="button">その他 <span class="expand-icon" id="expand-icon">▼</span></button>
       </div>
-      <div class="filter-panel" id="filter-panel" style="display:none;"><div class="filter-row"><label class="toggle-label"><input type="checkbox" data-filter="assist_used" />アシスト使用</label><label class="toggle-label"><input type="checkbox" data-filter="tag" />交代</label><label class="toggle-label"><input type="checkbox" data-filter="duo_only" />DUO限定</label></div><div class="filter-row filter-row-wide"><div class="filter-group"><span class="filter-label">Pゲージ</span><select data-filter="ult_gauge_point"><option value="">全て</option><option value="0">0</option><option value="1">1+</option></select></div><div class="filter-group"><span class="filter-label">Aゲージ</span><select data-filter="ult_gauge_assist"><option value="">全て</option><option value="0">0</option><option value="1">1+</option></select></div><div class="filter-group filter-group-tags"><span class="filter-label">タグ</span><div class="filter-chips filter-chips-wrap" data-filter="tags"><button class="chip" data-value="oki" type="button">起き攻め</button><button class="chip" data-value="corner_carry" type="button">端運び</button><button class="chip" data-value="side_switch" type="button">入替え</button><button class="chip" data-value="hkd" type="button">HKD</button><button class="chip" data-value="limit_strike" type="button">Limit Strike</button></div></div></div></div>
+      <div class="filter-panel" id="filter-panel" style="display:none;"><div class="filter-row"><label class="toggle-label"><input type="checkbox" data-filter="assist_used" />アシスト使用</label>{!isSidekick && <label class="toggle-label"><input type="checkbox" data-filter="tag" />交代</label>}<label class="toggle-label"><input type="checkbox" data-filter="duo_only" />DUO限定</label></div><div class="filter-row filter-row-wide"><div class="filter-group"><span class="filter-label">Pゲージ</span><select data-filter="ult_gauge_point"><option value="">すべて</option><option value="0">使用なし</option><option value="1">1本以下</option><option value="2">2本以下</option>{isSidekick && <option value="3">3本以下</option>}{isSidekick && <option value="4">4本以下</option>}</select></div>{!isSidekick && <div class="filter-group"><span class="filter-label">Aゲージ</span><select data-filter="ult_gauge_assist"><option value="">すべて</option><option value="0">使用なし</option><option value="1">1本以下</option><option value="2">2本以下</option></select></div>}<div class="filter-group filter-group-tags"><span class="filter-label">タグ</span><div class="filter-chips filter-chips-wrap" data-filter="tags"><button class="chip" data-value="oki" type="button">起き攻め</button><button class="chip" data-value="corner_carry" type="button">端運び</button><button class="chip" data-value="side_switch" type="button">入替え</button><button class="chip" data-value="throw" type="button">投げ</button><button class="chip" data-value="counter_hit" type="button">カウンターヒット</button><button class="chip" data-value="fury" type="button">フューリー</button><button class="chip" data-value="hkd" type="button">ハードノックダウン</button><button class="chip" data-value="limit_strike" type="button">リミットストライク</button><button class="chip" data-value="punish" type="button">確反</button>{!isSidekick && <button class="chip" data-value="to_tag_launcher" type="button">タッグランチャーまで</button>}</div></div></div></div>
     </div>
 
     <div class="content-layout">
@@ -101,8 +114,9 @@ const pageDescription = `${charA.nameJa} × ${charB.nameJa} のコンボ一覧�
 
 <style>
   .page { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 960px; margin: 0 auto; }
-  .headroom-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--color-bg); border-bottom: 1px solid var(--color-border); padding: 0.4rem 0.75rem; display: flex; align-items: center; transform: translateY(-100%); transition: transform 0.25s ease; pointer-events: none; }
+  .headroom-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--color-bg); border-bottom: 1px solid var(--color-border); transform: translateY(-100%); transition: transform 0.25s ease; pointer-events: none; }
   .headroom-nav.visible { transform: translateY(0); pointer-events: auto; }
+  .headroom-nav-inner { max-width: 960px; margin: 0 auto; padding: 0.4rem 1rem; display: flex; align-items: center; }
   .headroom-nav-link { font-size: 0.8rem; font-weight: 700; color: var(--color-text); display: inline-flex; align-items: center; gap: 0.4rem; }
   .headroom-nav-fuse { font-size: 0.65rem; font-weight: 600; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.03em; }
   .breadcrumb { font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -131,7 +145,7 @@ const pageDescription = `${charA.nameJa} × ${charB.nameJa} のコンボ一覧�
   .chip { padding: 0.2rem 0.5rem; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text-muted); font-size: 0.7rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; }
   .chip.active { border-color: var(--color-accent); color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
   .pulse-badge { font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.05rem 0.25rem; border-radius: 2px; background: color-mix(in srgb, var(--color-danger) 20%, transparent); color: var(--color-danger); }
-  .sort-select, .filter-panel select { padding: 0.2rem 0.4rem; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text); font-size: 0.7rem; }
+  .sort-select, .filter-panel select { padding: 0.2rem 0.4rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-surface); color: var(--color-text); font-size: 0.7rem; }
   .expand-toggle { margin-left: auto; padding: 0.2rem 0.6rem; border: 1px solid var(--color-border); border-radius: 4px; background: transparent; color: var(--color-text-muted); font-size: 0.7rem; cursor: pointer; }
   .filter-panel { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 0.5rem; }
   .toggle-label { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; color: var(--color-text-muted); cursor: pointer; }

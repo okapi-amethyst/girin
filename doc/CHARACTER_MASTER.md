@@ -18,5 +18,5 @@
 | 10  | vi         | Vi         | ヴァイ      |         |
 | 11  | warwick    | Warwick    | ワーウィック   |         |
 | 12  | yasuo      | Yasuo      | ヤスオ      |         |
-| 13  | akali      | Akali      | アカリ      | 新チャンピオン |
+| 13  | akali      | Akali      | アカリ      |         |
 | 14  | senna      | Senna      | セナ       | 新チャンピオン |

@@ -92,7 +92,6 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
         <div class="filter-group">
           <span class="filter-label">並び順</span>
           <select class="sort-select">
-            <option value="practicality-desc">実用度</option>
             <option value="difficulty-asc">難易度（低い順）</option>
             <option value="damage-desc">ダメージ（高い順）</option>
           </select>
@@ -114,7 +113,7 @@ function scaleCrop(crop: { bgSize: string; bgPosition: string }) {
 </Base>
 
 <script>
-  const WIKI_REF = 180;
+  const WIKI_REF = 180; // キャラ画像の参照元（2XKO Wiki）の基準サイズ (px)
   function scalePortraits() {
     document.querySelectorAll<HTMLElement>('[data-size]').forEach(el => {
       const w = el.clientWidth;

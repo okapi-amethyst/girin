@@ -11,8 +11,10 @@ combo_trim.py - コンボ動画の自動トリミングスクリプト
   ffmpeg と ffprobe が PATH に通っていること
 
 使い方:
-  python combo_trim.py <動画フォルダ>
-  例: python combo_trim.py C:/Videos/combos
+  python combo_trim.py <watchフォルダ>
+  例: python combo_trim.py C:/Videos/combos/watch
+
+  引数なしの場合は、スクリプトと同じ階層の watch/ を見る
 """
 
 import subprocess
@@ -20,6 +22,7 @@ import re
 import os
 import sys
 import json
+import shutil
 from pathlib import Path
 
 
@@ -97,11 +100,19 @@ def cut_video(input_path: str, output_path: str, start: float):
         raise RuntimeError(f"ffmpeg cut failed:\n{result.stderr[-500:]}")
 
 
+def open_video(output_path: str):
+    """Windows の既定アプリで動画を開く"""
+    if os.name != "nt":
+        print("  注意: 自動再生は Windows のみ対応です")
+        return
+    os.startfile(output_path)
+
+
 # ============================================================
 # メイン処理
 # ============================================================
 
-def process_video(input_path: str, output_dir: str):
+def process_video(input_path: str, output_dir: str) -> str | None:
     p = Path(input_path)
     output_path = str(Path(output_dir) / f"{p.stem}_trimmed{p.suffix}")
 
@@ -134,40 +145,81 @@ def process_video(input_path: str, output_dir: str):
         if start_time >= duration:
             print(f"  !! スキップ: スタート({start_time:.2f}) >= 動画長({duration:.2f})")
             print(f"     SILENCE_NOISE を調整してください")
-            return
+            return None
 
         print(f"  切り出し長: {duration - start_time:.2f} 秒")
 
         # ---- カット実行 ----
         cut_video(input_path, output_path, start_time)
         print(f"  完了 → {output_path}")
+        return output_path
 
     except Exception as e:
         print(f"  エラー: {e}")
+        return None
+
+
+def move_source(video_path: Path, destination_dir: Path) -> Path:
+    """元動画を再処理防止のため退避"""
+    destination_dir.mkdir(exist_ok=True)
+    target = destination_dir / video_path.name
+
+    if target.exists():
+        stem = video_path.stem
+        suffix = video_path.suffix
+        index = 1
+        while target.exists():
+            target = destination_dir / f"{stem}_{index}{suffix}"
+            index += 1
+
+    shutil.move(str(video_path), str(target))
+    return target
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("使い方: python combo_trim.py <動画フォルダ>")
-        print("例:     python combo_trim.py C:/Videos/combos")
-        sys.exit(1)
-
-    input_dir = Path(sys.argv[1])
+    script_dir = Path(__file__).resolve().parent
+    input_dir = Path(sys.argv[1]) if len(sys.argv) >= 2 else script_dir / "watch"
     if not input_dir.is_dir():
         print(f"エラー: フォルダが見つかりません: {input_dir}")
         sys.exit(1)
 
     output_dir = input_dir / "output"
+    done_dir = input_dir / "done"
+    error_dir = input_dir / "error"
     output_dir.mkdir(exist_ok=True)
 
-    videos = sorted(f for f in input_dir.iterdir() if f.suffix.lower() in VIDEO_EXTENSIONS)
+    videos = sorted(
+        f for f in input_dir.iterdir()
+        if f.is_file() and f.suffix.lower() in VIDEO_EXTENSIONS
+    )
     if not videos:
         print(f"動画ファイルが見つかりません ({'/'.join(VIDEO_EXTENSIONS)}): {input_dir}")
         sys.exit(1)
 
-    print(f"対象: {len(videos)} 本 → {output_dir}")
-    for video in videos:
-        process_video(str(video), str(output_dir))
+    print(f"対象: {len(videos)} 本")
+    print(f"watch : {input_dir}")
+    print(f"output: {output_dir}")
+    print(f"done  : {done_dir}")
+    print(f"error : {error_dir}")
+
+    for index, video in enumerate(videos, start=1):
+        print(f"\n[{index}/{len(videos)}]")
+        output_path = process_video(str(video), str(output_dir))
+
+        if output_path is None:
+            moved = move_source(video, error_dir)
+            print(f"  元動画を error へ移動 → {moved}")
+            continue
+
+        moved = move_source(video, done_dir)
+        print(f"  元動画を done へ移動 → {moved}")
+        print("  出力動画を再生します。確認後、プレイヤーを閉じて Enter で次へ進んでください。")
+        open_video(output_path)
+
+        if index < len(videos):
+            input("  Enter > ")
+        else:
+            input("  最後の確認後、Enter で終了 > ")
 
     print(f"\n{'='*50}")
     print("全処理完了")

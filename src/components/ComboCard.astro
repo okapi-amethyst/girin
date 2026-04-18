@@ -28,9 +28,8 @@ function starterLabel(starter: ComboData["starter"]): string {
   const map: Record<ComboData["starter"], string> = {
     ground: "地上",
     anti_air: "対空",
-    throw: "投げ",
     pressure_mixup: "崩し",
-    counter_hit: "CH",
+    tag_launcher: "TL始動",
   };
   return map[starter];
 }
@@ -40,22 +39,24 @@ function comboTagLabel(tag: ComboData["tags"][number]): string {
     oki: "起き攻め",
     corner_carry: "端運び",
     side_switch: "入替え",
-    fury: "Fury",
-    hkd: "HKD",
-    limit_strike: "Limit Strike",
-    crossup: "表裏",
+    throw: "投げ",
+    counter_hit: "カウンターヒット",
+    fury: "フューリー",
+    hkd: "ハードノックダウン",
+    limit_strike: "リミットストライク",
     punish: "確反",
+    to_tag_launcher: "タッグランチャーまで",
   };
   return map[tag];
 }
 
 function shortenInputs(inputs: string): { short: string; needsExpand: boolean } {
   const parts = inputs.split(/\s*>\s*/);
-  if (parts.length <= 5) {
+  if (parts.length <= 5) { // 5手以内は短縮なし（設計書: 短縮ルール）
     return { short: inputs, needsExpand: false };
   }
-  const head = parts.slice(0, 2).join(" > ");
-  const tail = parts.slice(-2).join(" > ");
+  const head = parts.slice(0, 2).join(" > ");  // 先頭2手
+  const tail = parts.slice(-2).join(" > ");    // 末尾2手
   return { short: `${head} > ... > ${tail}`, needsExpand: true };
 }
 
@@ -76,9 +77,9 @@ const comboCardId = `combo-${combo.id}`;
   data-ult-gauge-point={combo.ult_gauge_point}
   data-ult-gauge-assist={combo.ult_gauge_assist}
   data-tags={combo.tags.join(",")}
-  data-practicality={combo.practicality}
   data-damage={combo.damage}
 >
+  {combo.title && <p class="cc-title">{combo.title}</p>}
   <div class="cc-header">
     <span class="cc-difficulty">
       <span class="cc-stars">{stars(combo.difficulty)}</span>
@@ -86,6 +87,7 @@ const comboCardId = `combo-${combo.id}`;
     </span>
     <span class="cc-damage">{combo.damage.toLocaleString()}</span>
     <span class="cc-id">#{combo.id}</span>
+    {combo.game_version && <span class="cc-version">{combo.game_version}</span>}
   </div>
 
   <div class="cc-badges">
@@ -112,7 +114,6 @@ const comboCardId = `combo-${combo.id}`;
   <div class="cc-footer">
     <div class="cc-credit">
       <span class="cc-submitter">{combo.submitter_name}</span>
-      {combo.creator_name && <span class="cc-creator">考案: {combo.creator_name}</span>}
     </div>
     <div class="cc-actions">
       <button class="cc-action-btn" title="リンクをコピー" data-combo-id={combo.id}>
@@ -138,12 +139,14 @@ const comboCardId = `combo-${combo.id}`;
 <style>
   .combo-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem; transition: border-color 0.15s; cursor: pointer; }
   .combo-card:hover { border-color: color-mix(in srgb, var(--color-border) 50%, var(--color-accent)); }
+  .cc-title { font-size: 0.85rem; font-weight: 700; color: var(--color-text); line-height: 1.3; margin: 0; }
   .cc-header { display: flex; align-items: center; gap: 0.5rem; }
   .cc-difficulty { display: inline-flex; align-items: center; gap: 0.3rem; }
   .cc-stars { font-size: 0.7rem; color: #fbbf24; letter-spacing: 0.02em; }
   .cc-pulse-badge { font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.05rem 0.25rem; border-radius: 2px; background: color-mix(in srgb, var(--color-danger) 20%, transparent); color: var(--color-danger); }
   .cc-damage { font-size: 0.85rem; font-weight: 800; color: var(--color-text); margin-left: auto; }
   .cc-id { font-size: 0.65rem; color: var(--color-text-muted); opacity: 0.6; }
+  .cc-version { font-size: 0.6rem; color: var(--color-text-muted); opacity: 0.5; margin-left: 0.2rem; }
   .cc-badges { display: flex; gap: 0.25rem; flex-wrap: wrap; }
   .cc-badge { font-size: 0.6rem; font-weight: 600; padding: 0.1rem 0.35rem; border-radius: 3px; white-space: nowrap; }
   .cc-badge-starter { background: color-mix(in srgb, var(--color-accent) 15%, transparent); color: var(--color-accent); border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent); }
